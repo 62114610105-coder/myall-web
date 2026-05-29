@@ -1,0 +1,690 @@
+bash
+
+cat > /mnt/user-data/outputs/factory-full.html << 'HTMLEOF'
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ระบบบริหารโรงงานเฟอร์นิเจอร์</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&family=Rajdhani:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+/* ═══ DESIGN SYSTEM ═══ */
+:root{
+  --or:#FF6200;--or-l:#FF8040;--or-d:#CC4F00;
+  --dk:#08111A;--dk2:#0F1C28;--dk3:#172030;--st:#1E2E3E;
+  --wh:#FFFFFF;--off:#F3F6F9;--g1:#E4EAF0;--g2:#B8C6D2;--g3:#7A94A8;--g4:#3D5568;
+  --cut-c:#378ADD;--edge-c:#1D9E75;--cnc-c:#D08A26;
+  --fn:'Prompt','Sarabun',sans-serif;--fn-n:'Rajdhani','Prompt',sans-serif;
+  --sh-sm:0 2px 10px rgba(0,0,0,.10);--sh-lg:0 10px 48px rgba(0,0,0,.22);--sh-or:0 4px 22px rgba(255,98,0,.35);
+  --nav-h:68px;
+  /* Cap Dashboard */
+  --tp:#111110;--ts:#2b2b28;--tt:#666660;--ti:#0f4c81;--td:#7a1e1e;--tg:#274e13;--tw:#5e3a0c;
+  --bp:#fff;--bs:#f4f4f2;--bi:#e6f0fa;--bda:#fbebeb;--bg:#eaf2e8;--bw:#f9f2e7;
+  --bdt:rgba(0,0,0,.13);--bds:rgba(0,0,0,.28);--bdi:#8cb4db;--bdd:#e69d9d;--bdg:#a3c99b;--bdw:#e6c59d;
+  --r6:6px;--r10:10px;--r12:12px;--shadow:0 1px 4px rgba(0,0,0,.07),0 0 0 .5px rgba(0,0,0,.09);
+}
+@media(prefers-color-scheme:dark){
+  :root{--tp:#f0f0ec;--ts:#c0c0b8;--tt:#888880;--ti:#90bff0;--td:#f5a0a0;--tg:#a0d080;--tw:#f5c060;
+  --bp:#1c1c1a;--bs:#252523;--bi:#0d3861;--bda:#591616;--bg:#1e3b0e;--bw:#442a09;
+  --bdt:rgba(255,255,255,.12);--bds:rgba(255,255,255,.26);--bdi:#0d3861;--bdd:#591616;--bdg:#1e3b0e;--bdw:#442a09;}
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--fn);background:var(--wh);color:var(--dk2);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--g2);border-radius:3px}::-webkit-scrollbar-thumb:hover{background:var(--or)}
+
+/* ── NAV ── */
+.nav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:rgba(8,17,26,.95);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,98,0,.18);z-index:1000;display:flex;align-items:center;padding:0 28px;transition:all .3s}
+.nav.scrolled{box-shadow:0 4px 24px rgba(0,0,0,.4)}
+.nav-logo{display:flex;align-items:center;gap:11px;margin-right:auto;text-decoration:none}
+.nav-logo-icon{width:38px;height:38px;background:linear-gradient(135deg,var(--or),var(--or-d));border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:var(--sh-or);flex-shrink:0}
+.nav-logo-name{font-size:14px;font-weight:800;color:var(--wh);letter-spacing:-.02em;line-height:1.1}
+.nav-logo-sub{font-size:10px;color:var(--g3);font-weight:400;letter-spacing:.06em}
+.nav-links{display:flex;gap:2px;list-style:none}
+.nav-links a{display:block;padding:7px 12px;font-size:12px;font-weight:600;color:var(--g2);text-decoration:none;border-radius:7px;transition:all .2s;white-space:nowrap}
+.nav-links a:hover{background:rgba(255,98,0,.15);color:var(--or-l)}
+.nav-links a.active{background:var(--or);color:white;box-shadow:var(--sh-or)}
+@media(max-width:860px){.nav-links{display:none}}
+
+/* ── HERO ── */
+.hero{height:100vh;min-height:620px;position:relative;display:flex;align-items:center;overflow:hidden;background:var(--dk)}
+.hero-bg{position:absolute;inset:0;background-image:url('https://i.postimg.cc/Mpw5sPNB/hero-factory-jpg.jpg');background-size:cover;background-position:center 40%;filter:brightness(.32) saturate(.6);transform:scale(1.04);animation:bgZoom 18s ease-out forwards}
+@keyframes bgZoom{to{transform:scale(1)}}
+.hero-overlay{position:absolute;inset:0;background:linear-gradient(135deg,rgba(8,17,26,.75) 0%,rgba(23,32,48,.5) 60%,rgba(255,98,0,.06) 100%)}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,98,0,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,98,0,.035) 1px,transparent 1px);background-size:64px 64px}
+.hero-stripe{position:absolute;top:0;left:0;width:5px;height:100%;background:linear-gradient(180deg,transparent,var(--or),transparent)}
+.hero-content{position:relative;z-index:2;max-width:1200px;margin:0 auto;padding:0 40px;width:100%;padding-top:var(--nav-h)}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,98,0,.14);border:1px solid rgba(255,98,0,.38);color:var(--or-l);padding:6px 15px;border-radius:100px;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:22px;animation:fadeUp .7s ease both}
+.hero-badge-dot{width:7px;height:7px;background:var(--or);border-radius:50%;animation:blink 1.5s ease infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.hero-title{font-size:clamp(34px,5vw,62px);font-weight:800;color:var(--wh);line-height:1.08;letter-spacing:-.03em;margin-bottom:18px;animation:fadeUp .7s .1s ease both}
+.hero-title .accent{color:var(--or);position:relative}
+.hero-title .accent::after{content:'';position:absolute;bottom:-4px;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--or),transparent);border-radius:2px}
+.hero-desc{font-size:16px;color:var(--g2);max-width:520px;line-height:1.8;margin-bottom:36px;animation:fadeUp .7s .2s ease both}
+.hero-cta{display:flex;gap:12px;flex-wrap:wrap;animation:fadeUp .7s .3s ease both}
+.btn-primary{display:inline-flex;align-items:center;gap:8px;padding:13px 24px;background:var(--or);color:white;font-size:14px;font-weight:700;border-radius:9px;text-decoration:none;border:none;cursor:pointer;transition:all .2s;box-shadow:var(--sh-or);font-family:var(--fn)}
+.btn-primary:hover{background:var(--or-l);transform:translateY(-2px)}
+.btn-ghost{display:inline-flex;align-items:center;gap:8px;padding:13px 24px;background:transparent;color:var(--g2);font-size:14px;font-weight:600;border-radius:9px;text-decoration:none;border:1px solid rgba(255,255,255,.18);cursor:pointer;transition:all .2s;font-family:var(--fn)}
+.btn-ghost:hover{border-color:rgba(255,255,255,.45);color:white;background:rgba(255,255,255,.06)}
+.hero-stats-inner{max-width:1200px;margin:0 auto;padding:0 40px;display:grid;grid-template-columns:repeat(4,1fr)}
+.hero-stat{padding:22px 28px;background:rgba(8,17,26,.82);border-top:1px solid rgba(255,255,255,.08);backdrop-filter:blur(8px);transition:background .2s;animation:fadeUp .6s ease both}
+.hero-stat:nth-child(1){animation-delay:.4s}.hero-stat:nth-child(2){animation-delay:.5s}.hero-stat:nth-child(3){animation-delay:.6s}.hero-stat:nth-child(4){animation-delay:.7s}
+.hero-stat:hover{background:rgba(255,98,0,.12)}
+.hero-stat:not(:last-child){border-right:1px solid rgba(255,255,255,.07)}
+.hero-stat-num{font-family:var(--fn-n);font-size:30px;font-weight:700;color:var(--or);line-height:1;margin-bottom:5px}
+.hero-stat-lbl{font-size:11px;color:var(--g3);font-weight:500;letter-spacing:.04em}
+@keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── LAYOUT ── */
+.sec{padding:80px 0}
+.sec-dark{background:var(--dk2)}.sec-gray{background:var(--off)}.sec-darker{background:var(--dk)}
+.cont{max-width:1200px;margin:0 auto;padding:0 40px}
+@media(max-width:600px){.cont{padding:0 20px}.sec{padding:56px 0}}
+.sec-tag{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--or);margin-bottom:10px}
+.sec-tag::before{content:'';width:22px;height:2px;background:var(--or);border-radius:1px}
+.sec-h{font-size:clamp(26px,3.5vw,40px);font-weight:800;color:var(--dk2);letter-spacing:-.03em;line-height:1.18;margin-bottom:10px}
+.sec-h.lht{color:var(--wh)}
+.sec-p{font-size:15px;color:var(--g4);max-width:620px;line-height:1.8;margin-bottom:48px}
+.divider{height:1px;background:linear-gradient(90deg,transparent,var(--g1),transparent)}
+
+/* ── MACHINE CARDS ── */
+.mach-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+@media(max-width:1100px){.mach-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:760px){.mach-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.mach-grid{grid-template-columns:1fr}}
+.mach-card{background:var(--wh);border-radius:14px;overflow:hidden;border:1px solid var(--g1);box-shadow:var(--sh-sm);transition:all .3s}
+.mach-card:hover{transform:translateY(-7px);box-shadow:var(--sh-lg);border-color:var(--or)}
+.mach-card-img-w{overflow:hidden;position:relative;height:170px;background:var(--st)}
+.mach-card-img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
+.mach-card:hover .mach-card-img{transform:scale(1.07)}
+.mach-card-dept{position:absolute;top:10px;left:10px;padding:4px 10px;border-radius:100px;font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;backdrop-filter:blur(8px)}
+.dc{background:rgba(55,138,221,.85);color:#fff}.de{background:rgba(29,158,117,.85);color:#fff}.dn{background:rgba(208,138,38,.85);color:#fff}
+.mach-card-body{padding:16px 18px}
+.mach-card-name{font-size:14px;font-weight:800;color:var(--dk2);margin-bottom:3px;letter-spacing:-.01em;line-height:1.2}
+.mach-card-cat{font-size:10px;color:var(--g3);font-weight:500;margin-bottom:12px}
+.spec-minis{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.sp-mini{background:var(--off);border-radius:6px;padding:7px 9px}
+.sp-mini-l{font-size:9px;color:var(--g3);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+.sp-mini-v{font-family:var(--fn-n);font-size:12px;font-weight:700;color:var(--dk2)}
+
+/* ── DEPT DETAIL ── */
+.dept-hdr{display:flex;align-items:flex-start;gap:20px;margin-bottom:36px;padding-bottom:28px;border-bottom:1px solid rgba(255,255,255,.09)}
+.dept-ico{width:60px;height:60px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0}
+.dic-cut{background:rgba(55,138,221,.2)}.dic-edge{background:rgba(29,158,117,.2)}.dic-cnc{background:rgba(208,138,38,.2)}
+.dept-title{font-size:28px;font-weight:800;color:var(--wh);letter-spacing:-.02em;margin-bottom:4px}
+.dept-sub{font-size:13px;color:var(--g3)}
+.mach-det{display:grid;grid-template-columns:320px 1fr;gap:0;margin-bottom:28px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:16px;overflow:hidden;transition:border-color .3s}
+.mach-det:hover{border-color:rgba(255,98,0,.25)}
+@media(max-width:820px){.mach-det{grid-template-columns:1fr}}
+.mach-det-img{width:100%;height:100%;min-height:260px;object-fit:cover;display:block;background:var(--st)}
+.mach-det-body{padding:28px 28px 28px 26px}
+@media(max-width:820px){.mach-det-body{padding:20px}}
+.mach-det-name{font-size:21px;font-weight:800;color:var(--wh);letter-spacing:-.02em;margin-bottom:4px}
+.mach-det-tag{font-size:11px;color:var(--or);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:18px}
+.spec-tbl{width:100%;border-collapse:collapse}
+.spec-tbl tr{border-bottom:1px solid rgba(255,255,255,.05)}
+.spec-tbl tr:last-child{border-bottom:none}
+.spec-tbl td{padding:6px 0;font-size:12px;vertical-align:top}
+.spec-tbl td:first-child{color:var(--g3);font-weight:500;width:55%;padding-right:10px;line-height:1.4}
+.spec-tbl td:last-child{font-family:var(--fn-n);font-weight:700;color:var(--wh);font-size:13px}
+
+/* ── CAPACITY SECTION WRAPPER ── */
+.cap-wrap{max-width:1140px;margin:0 auto;padding:0 20px}
+.cap-embed-box{background:#f4f4f2;border-radius:16px;box-shadow:0 5px 24px rgba(0,0,0,.16);overflow:hidden;border:1px solid rgba(0,0,0,.06)}
+#cap-root{font-family:'Inter','Sarabun',sans-serif;-webkit-font-smoothing:antialiased;background:var(--bs);color:var(--tp)}
+#cap-root *,#cap-root *::before,#cap-root *::after{box-sizing:border-box}
+#cap-root .wrap{max-width:1100px;margin:0 auto;padding:20px 16px 40px}
+#cap-root .hdr{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:20px;padding-bottom:16px;border-bottom:2px solid var(--bdt)}
+#cap-root .hdr-t{font-size:21px;font-weight:800;color:var(--tp);letter-spacing:-.02em;margin-bottom:3px}
+#cap-root .hdr-s{font-size:12px;color:var(--tt);font-weight:500}
+#cap-root .save-btn{display:flex;align-items:center;gap:6px;padding:7px 14px;font-size:12px;font-weight:700;border:1px solid var(--bds);border-radius:var(--r6);background:var(--bp);color:var(--ts);cursor:pointer;transition:all .15s}
+#cap-root .save-btn:hover{border-color:var(--ti);color:var(--ti)}
+#cap-root .save-btn.saved{border-color:var(--bdg);background:var(--bg);color:var(--tg)}
+#cap-root .card{background:var(--bp);border-radius:var(--r12);border:.5px solid var(--bdt);box-shadow:var(--shadow);overflow:hidden}
+#cap-root .tabs{display:flex;border-bottom:1px solid var(--bdt);padding:0 6px;background:var(--bs);flex-wrap:wrap}
+#cap-root .tb{padding:11px 16px;font-size:13px;font-weight:700;border:none;background:transparent;color:var(--tt);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px;border-radius:var(--r6) var(--r6) 0 0;transition:all .15s;white-space:nowrap}
+#cap-root .tb:hover{color:var(--ts);background:var(--bp)}
+#cap-root .tb.a{color:var(--ti);border-bottom-color:var(--ti);background:var(--bp)}
+#cap-root .tab-body{padding:18px}
+#cap-root .cap-sec{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--ti);margin:16px 0 9px;padding-left:8px;border-left:4px solid var(--ti)}
+#cap-root .cap-sec:first-child{margin-top:0}
+#cap-root .mcard{background:var(--bp);border:.5px solid var(--bdt);border-radius:var(--r10);padding:14px 14px 14px 19px;margin-bottom:11px;position:relative;overflow:hidden;box-shadow:var(--shadow)}
+#cap-root .mbar{position:absolute;left:0;top:0;bottom:0;width:5px}
+#cap-root .mhdr{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:13px}
+#cap-root .mname{font-size:15px;font-weight:800;color:var(--tp);letter-spacing:-.01em}
+#cap-root .morg{font-size:10px;color:var(--tt);margin-top:2px;font-weight:500}
+#cap-root .pills{display:flex;gap:7px;flex-wrap:wrap}
+#cap-root .pill{display:flex;align-items:center;gap:6px;padding:5px 9px;border-radius:var(--r6);border:.5px solid var(--bds);background:var(--bs)}
+#cap-root .pill.loss{border-color:var(--bdd);background:var(--bda)}
+#cap-root .pill-lbl{font-size:11px;font-weight:700;color:var(--ts);white-space:nowrap}
+#cap-root .pill.loss .pill-lbl{color:var(--td)}
+#cap-root .pill-inp{width:44px;border:none;background:transparent;font-size:13px;font-weight:700;color:var(--tp);outline:none;text-align:center;-moz-appearance:textfield}
+#cap-root .pill-inp::-webkit-inner-spin-button,#cap-root .pill-inp::-webkit-outer-spin-button{-webkit-appearance:none}
+#cap-root .pill.loss .pill-inp{color:var(--td)}
+#cap-root .pill-u{font-size:11px;color:var(--tt);white-space:nowrap}
+#cap-root .dv{border:none;border-top:.5px solid var(--bdt);margin:12px 0}
+#cap-root .sc-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:11px}
+@media(max-width:680px){#cap-root .sc-grid{grid-template-columns:1fr}}
+#cap-root .sc-box{background:var(--bs);border:.5px solid var(--bdt);border-radius:var(--r6);padding:12px}
+#cap-root .sc-title{font-size:10px;font-weight:800;color:var(--ti);margin-bottom:8px;padding-bottom:5px;border-bottom:.5px solid var(--bdt);text-transform:uppercase;letter-spacing:.04em}
+#cap-root .sc-title.w{color:var(--tw)}
+#cap-root .ig-col{display:flex;flex-direction:column;gap:6px}
+#cap-root .ig2{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+#cap-root .ig4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+#cap-root .ig6{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:7px}
+@media(max-width:720px){#cap-root .ig6{grid-template-columns:repeat(3,1fr)}#cap-root .ig4{grid-template-columns:repeat(2,1fr)}}
+#cap-root .iw{display:flex;flex-direction:column;gap:3px}
+#cap-root .il{font-size:10px;color:var(--ts);font-weight:600}
+#cap-root .il.note{color:var(--tg);font-weight:700}
+#cap-root .irow{display:flex;align-items:center;border:.5px solid var(--bds);border-radius:var(--r6);overflow:hidden;background:var(--bp);height:31px;transition:border-color .15s}
+#cap-root .irow:focus-within{border-color:var(--ti);box-shadow:0 0 0 2px var(--bdi)}
+#cap-root .inp{width:100%;border:none;outline:none;padding:0 7px;font-size:12px;font-weight:700;color:var(--tp);background:transparent;min-width:0;text-align:right;-moz-appearance:textfield}
+#cap-root .inp::-webkit-inner-spin-button,#cap-root .inp::-webkit-outer-spin-button{-webkit-appearance:none}
+#cap-root .iu{padding:0 7px 0 2px;font-size:10px;color:var(--tt);white-space:nowrap;flex-shrink:0;font-weight:600}
+#cap-root .irow.act{border-color:var(--bdw);background:var(--bw)}
+#cap-root .sel-row{display:flex;align-items:center;border:.5px solid var(--bds);border-radius:var(--r6);overflow:hidden;background:var(--bp);height:31px}
+#cap-root .sel-sm{width:100%;border:none;outline:none;padding:0 7px;font-size:12px;font-weight:700;color:var(--tp);background:transparent;cursor:pointer;height:100%}
+#cap-root .oc{background:var(--bs);border-radius:var(--r6);padding:9px 11px;border:.5px solid var(--bdt)}
+#cap-root .oc.tgt{background:var(--bi);border-left:4px solid var(--ti)}
+#cap-root .oc.act{background:var(--bw);border-left:4px solid var(--tw)}
+#cap-root .ol{font-size:10px;color:var(--tt);margin-bottom:3px;font-weight:600}
+#cap-root .ov{font-size:18px;font-weight:800;line-height:1.2;letter-spacing:-.01em}
+#cap-root .ou{font-size:10px;color:var(--tt);margin-top:2px;font-weight:500}
+#cap-root .totbox{background:var(--bs);border-radius:var(--r10);padding:12px 14px;border:.5px solid var(--bdt)}
+#cap-root .totgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+#cap-root .tl{font-size:10px;color:var(--tt);margin-bottom:3px;font-weight:500}
+#cap-root .tv{font-size:19px;font-weight:800;color:var(--tp)}
+#cap-root .tu{font-size:10px;color:var(--tt);margin-top:1px}
+#cap-root .emb{padding:5px 12px;font-size:12px;border:.5px solid var(--bds);border-radius:var(--r6);background:var(--bp);color:var(--ts);cursor:pointer;font-weight:700;transition:all .15s}
+#cap-root .emb:hover{border-color:var(--ti);color:var(--ti)}
+#cap-root .emb.a{background:var(--ti);color:#fff;border-color:var(--ti)}
+#cap-root .edge-ctrl{display:flex;flex-wrap:wrap;gap:11px;background:var(--bs);border:.5px solid var(--bdt);padding:11px;border-radius:var(--r6);margin-bottom:11px;align-items:flex-end}
+#cap-root .ctrl-lbl{font-size:10px;font-weight:800;color:var(--ts);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+#cap-root .flow{display:flex;align-items:center;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+#cap-root .fbox{flex:1;min-width:150px;text-align:center;background:var(--bs);border-radius:var(--r10);padding:12px 6px;border:.5px solid var(--bdt)}
+#cap-root .fbox.bn{background:var(--bda);border:2px solid var(--bdd)}
+#cap-root .fn{font-size:11px;font-weight:700;color:var(--ts);margin-bottom:3px}
+#cap-root .fv{font-size:22px;font-weight:800;color:var(--tp);line-height:1;margin-bottom:2px}
+#cap-root .fu{font-size:10px;color:var(--tt)}
+#cap-root .fbox.bn .fn,#cap-root .fbox.bn .fv,#cap-root .fbox.bn .fu{color:var(--td)}
+#cap-root .feff{display:inline-block;margin-top:5px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px}
+#cap-root .farr{color:var(--tt);font-size:22px;flex:0 0 18px;text-align:center;font-weight:800}
+#cap-root .cnote{font-size:12px;color:var(--ts);background:var(--bi);border:.5px solid var(--bdi);border-radius:var(--r6);padding:10px 12px;margin-bottom:12px;line-height:1.65;font-weight:500}
+#cap-root .cnote b{color:var(--ti)}
+#cap-root .kpi-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:14px}
+@media(max-width:600px){#cap-root .kpi-row{grid-template-columns:repeat(2,1fr)}}
+#cap-root .kpi{background:var(--bp);border:.5px solid var(--bdt);border-radius:var(--r10);padding:11px 13px;box-shadow:var(--shadow)}
+#cap-root .kpi-l{font-size:10px;color:var(--tt);margin-bottom:3px;font-weight:600}
+#cap-root .kpi-v{font-size:22px;font-weight:800;line-height:1.1;letter-spacing:-.02em}
+#cap-root .kpi-u{font-size:10px;color:var(--tt);margin-top:2px;font-weight:500}
+#cap-root .chart-box{background:var(--bs);border:.5px solid var(--bdt);border-radius:var(--r10);padding:13px;margin-bottom:11px}
+#cap-root .chart-box.tall{height:320px}
+#cap-root .chart-box.med{height:200px}
+#cap-root .ctbl{width:100%;border-collapse:collapse;font-size:12px}
+#cap-root .ctbl th{padding:9px 10px;font-size:10px;color:var(--tt);text-align:left;border-bottom:1.5px solid var(--bds);text-transform:uppercase;letter-spacing:.04em;background:var(--bs);font-weight:800;white-space:nowrap}
+#cap-root .ctbl td{padding:10px;border-bottom:.5px solid var(--bdt);color:var(--ts);vertical-align:middle;font-weight:600}
+#cap-root .ctbl td.n{font-weight:800;color:var(--tp)}
+#cap-root .ctbl tr:last-child td{border-bottom:none}
+#cap-root .badge{display:inline-flex;align-items:center;padding:3px 7px;border-radius:4px;font-size:10px;font-weight:800}
+#cap-root .badge-ok{background:var(--bg);color:var(--tg);border:.5px solid var(--bdg)}
+#cap-root .badge-warn{background:var(--bw);color:var(--tw);border:.5px solid var(--bdw)}
+#cap-root .badge-danger{background:var(--bda);color:var(--td);border:.5px solid var(--bdd)}
+#cap-root .ctrl-row{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:13px}
+#cap-root .cap-footer{margin-top:16px;text-align:center;font-size:11px;color:var(--tt);font-weight:500;padding-bottom:8px}
+#cap-root .rep-dept{margin-bottom:20px}
+#cap-root .rep-title{font-size:14px;font-weight:800;color:var(--tp);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+#cap-root .rep-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:11px}
+@media(max-width:640px){#cap-root .rep-grid{grid-template-columns:1fr}}
+#cap-root .rep-card{background:var(--bp);border:.5px solid var(--bdt);border-radius:var(--r10);padding:13px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+#cap-root .rep-bar{position:absolute;top:0;left:0;right:0;height:4px}
+#cap-root .rep-sc{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--tt);margin-bottom:10px}
+#cap-root .rep-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
+#cap-root .rep-lbl{font-size:11px;color:var(--tt);font-weight:500}
+#cap-root .rep-val{font-size:16px;font-weight:800}
+#cap-root .rep-gap{display:flex;align-items:center;justify-content:space-between;background:var(--bs);border-radius:5px;padding:6px 9px;margin-top:8px}
+#cap-root .rep-gap-lbl{font-size:10px;color:var(--tt);font-weight:600}
+#cap-root .rep-gap-val{font-size:13px;font-weight:800}
+#cap-root .rep-reason{font-size:10px;color:var(--ts);background:var(--bw);border-radius:4px;padding:5px 8px;margin-top:7px;line-height:1.5;font-weight:500}
+#cap-root .rep-pct-bar-wrap{background:var(--bdt);border-radius:3px;height:4px;margin-top:6px;overflow:hidden}
+#cap-root .rep-pct-bar{height:4px;border-radius:3px;transition:width .4s}
+
+/* ── MAINT SECTION ── */
+#maint-root{font-family:'Prompt',sans-serif;background-color:#f3f4f6;padding-bottom:0}
+#maint-root .status-green{background-color:#10B981;color:white}
+#maint-root .status-yellow{background-color:#F59E0B;color:white}
+#maint-root .status-red{background-color:#EF4444;color:white}
+.maint-wrap{padding:24px 0 40px}
+
+/* ── FOOTER ── */
+.site-footer{background:var(--dk);border-top:1px solid rgba(255,98,0,.15);padding:36px 0 22px}
+.footer-inner{max-width:1200px;margin:0 auto;padding:0 40px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px}
+.footer-brand{display:flex;align-items:center;gap:10px}
+.footer-brand-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--or),var(--or-d));border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.footer-brand-name{font-size:13px;font-weight:700;color:var(--wh)}
+.footer-brand-sub{font-size:10px;color:var(--g4)}
+.footer-copy{font-size:11px;color:var(--g4)}
+</style>
+</head>
+<body>
+
+<!-- ══ NAV ══ -->
+<nav class="nav" id="main-nav">
+  <a href="#home" class="nav-logo">
+    <div class="nav-logo-icon">🏭</div>
+    <div style="display:flex;flex-direction:column">
+      <div class="nav-logo-name">Factory Management</div>
+      <div class="nav-logo-sub">FURNITURE PRODUCTION SYSTEM</div>
+    </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#machines" id="nav-machines">เครื่องจักร</a></li>
+    <li><a href="#cut-section" id="nav-cut">✂️ ตัด</a></li>
+    <li><a href="#edge-section" id="nav-edge">⬜ ปิดขอบ</a></li>
+    <li><a href="#cnc-section" id="nav-cnc">🔩 CNC</a></li>
+    <li><a href="#capacity" id="nav-cap">📊 กำลังผลิต</a></li>
+    <li><a href="#maintenance" id="nav-maint">🛠️ บำรุงรักษา</a></li>
+  </ul>
+</nav>
+
+<!-- ══ HERO ══ -->
+<section class="hero" id="home">
+  <div class="hero-bg"></div><div class="hero-overlay"></div><div class="hero-grid"></div><div class="hero-stripe"></div>
+  <div class="hero-content">
+    <div class="hero-badge"><span class="hero-badge-dot"></span>FURNITURE FACTORY · อุตสาหกรรมเฟอร์นิเจอร์</div>
+    <h1 class="hero-title">ระบบบริหาร<br><span class="accent">โรงงานเฟอร์นิเจอร์</span></h1>
+    <p class="hero-desc">บริหารกำลังการผลิต ติดตามสเปคเครื่องจักร และวางแผนการบำรุงรักษาเชิงป้องกัน</p>
+    <div class="hero-cta">
+      <a href="#capacity" class="btn-primary">ดูระบบบริหารผลผลิต</a>
+      <a href="#machines" class="btn-ghost">เครื่องจักรทั้งหมด</a>
+    </div>
+  </div>
+  <div style="position:absolute;bottom:0;left:0;right:0;z-index:2">
+    <div class="hero-stats-inner">
+      <div class="hero-stat"><div class="hero-stat-num">9</div><div class="hero-stat-lbl">เครื่องจักรในระบบ</div></div>
+      <div class="hero-stat"><div class="hero-stat-num">3</div><div class="hero-stat-lbl">แผนกการผลิต</div></div>
+      <div class="hero-stat"><div class="hero-stat-num">5,000+</div><div class="hero-stat-lbl">รูเจาะ/วัน</div></div>
+      <div class="hero-stat"><div class="hero-stat-num">10,000</div><div class="hero-stat-lbl">เมตร Edge Lifespan</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ MACHINE OVERVIEW ══ -->
+<section class="sec sec-gray" id="machines">
+  <div class="cont">
+    <div class="sec-tag">เครื่องจักรในโรงงาน</div>
+    <h2 class="sec-h">ภาพรวมเครื่องจักรทั้งหมด</h2>
+    <p class="sec-p">เครื่องจักรทั้ง 9 เครื่องครอบคลุม 3 กระบวนการหลัก: การตัด ปิดขอบ และเจาะ</p>
+    <div class="mach-grid">
+      <div class="mach-card"><div class="mach-card-img-w"><img class="mach-card-img" src="https://storage.googleapis.com/www.taiwantradeshow.com.tw/product/202601/T-30297846.jpg" onerror="this.src='https://picsum.photos/seed/bs120/600/400'"><div class="mach-card-dept dc">CUTTING</div></div><div class="mach-card-body"><div class="mach-card-name">CHAMP FOND BS-120</div><div class="mach-card-cat">เครื่องตัดแผ่น · Beam Saw</div><div class="spec-minis"><div class="sp-mini"><div class="sp-mini-l">Blade Rise</div><div class="sp-mini-v">120 mm</div></div><div class="sp-mini"><div class="sp-mini-l">Saw Speed</div><div class="sp-mini-v">4,800 rpm</div></div><div class="sp-mini"><div class="sp-mini-l">Carriage</div><div class="sp-mini-v">160 m/min</div></div><div class="sp-mini"><div class="sp-mini-l">Motor</div><div class="sp-mini-v">18.5 kW</div></div></div></div></div>
+      <div class="mach-card"><div class="mach-card-img-w"><img class="mach-card-img" src="https://files.hoechsmann.com/lexikon/img/full/sce_fh_4_5_6_8_2023.jpg?v=4" onerror="this.src='https://picsum.photos/seed/schelling/600/400'"><div class="mach-card-dept dc">CUTTING</div></div><div class="mach-card-body"><div class="mach-card-name">SCHELLING FH4-330</div><div class="mach-card-cat">เครื่องตัดแผ่น · Beam Saw</div><div class="spec-minis"><div class="sp-mini"><div class="sp-mini-l">Cut Length</div><div class="sp-mini-v">3,300 mm</div></div><div class="sp-mini"><div class="sp-mini-l">Saw RPM</div><div class="sp-mini-v">4,800 rpm</div></div><div class="sp-mini"><div class="sp-mini-l">Carriage</div><div class="sp-mini-v">120 m/min</div></div><div class="sp-mini"><div class="sp-mini-l">Motor</div><div class="sp-mini-v">18 kW</div></div></div></div></div>
+      <div class="mach-card"><div class="mach-card-img-w"><img class="mach-card-img" src="https://pi314.bg/wp-content/uploads/2025/08/506R2-700x350.png" onerror="this.src='https://picsum.photos/600/400?random=3'"><div class="mach-card-dept de">EDGE</div></div><div class="mach-card-body"><div class="mach-card-name">HUAHUA HH-506R</div><div class="mach-card-cat">เครื่องปิดขอบ · Edge Bander</div><div class="spec-minis"><div class="sp-mini"><div class="sp-mini-l">Feed Speed</div><div class="sp-mini-v">20 m/min</div></div><div class="sp-mini"><div class="sp-mini-l">Tape Thick</div><div class="sp-mini-v">0.4–3 mm</div></div><div class="sp-mini"><div class="sp-mini-l">Glue Temp</div><div class="sp-mini-v">210°C</div></div><div class="sp-mini"><div class="sp-mini-l">Total Power</div><div class="sp-mini-v">20 kW</div></div></div></div></div>
+      <div class="mach-card"><div class="mach-card-img-w"><img class="mach-card-img" src="https://image.makewebcdn.com/makeweb/r_409x409/zbc4w5Ogy/edgebander/%E0%B9%80%E0%B8%84%E0%B8%A3%E0%B8%B7%E0%B9%88%E0%B8%AD%E0%B8%87%E0%B8%9B%E0%B8%B4%E0%B8%94%E0%B8%82%E0%B8%AD%E0%B8%9A_D9P.jpg?v=202405291424" onerror="this.src='https://picsum.photos/600/400?random=4'"><div class="mach-card-dept de">EDGE</div></div><div class="mach-card-body"><div class="mach-card-name">AW2M</div><div class="mach-card-cat">เครื่องปิดขอบ · Edge Bander</div><div class="spec-minis"><div class="sp-mini"><div class="sp-mini-l">Feed Speed</div><div class="sp-mini-v">20 m/min</div></div><div class="sp-mini"><div class="sp-mini-l">Tape Thick</div><div class="sp-mini-v">0.4–3 mm</div></div><div class="sp-mini"><div class="sp-mini-l">Glue Temp</div><div class="sp-mini-v">210°C</div></div><div class="sp-mini"><div class="sp-mini-l">Total Power</div><div class="sp-mini-v">20 kW</div></div></div></div></div>
+      <div class="mach-card"><div class="mach-card-img-w"><img class="mach-card-img" src="https://www.sirikraimachinery.com/image/champ-fond-EB.jpg" onerror="this.src='https://picsum.photos/600/400?random=5'"><div class="mach-card-dept de">EDGE</div></div><div class="mach-card-body"><div class="mach-card-name">CHAMP FOND EB-7B</div><div class="mach-card-cat">เครื่องปิดขอบ · Edge Bander</div><div class="spec-minis"><div class="sp-mini"><div class="sp-mini-l">Feed Speed</div><div class="sp-mini-v">24 m/min</div></div><div class="sp-mini"><div class="sp-mini-l">PVC Tape</div><div class="sp-mini-v">0.4–3 mm</div></div><div class="sp-mini"><div class="sp-mini-l">Solid Wood</div><div class="sp-mini-v">5 mm max</div></div><div class="sp-mini"><div class="sp-mini-l">Corner RPM</div><div class="sp-mini-v">18,000</div></div></div></div></div>
+      <div class="mach-card"><div class="mach-card-img-w"><img class="mach-card-img" src="https://www.567mac.com/pro-pic/mfb80cy.jpg"><div class="mach-card-dept de">EDGE</div></div><div class="mach-card-body"><div class="mach-card-name">NANXING NB6IJ</div><div class="mach-card-cat">เครื่องปิดขอบ · Edge Bander</div><div class="spec-minis"><div class="sp-mini"><div class="sp-mini-l">Feed Speed</div><div class="sp-mini-v">20 m/min</div></div><div class="sp-mini"><div class="sp-mini-l">Bevel Angle</div><div class="sp-mini-v">45°</div></div><div class="sp-mini"><div class="sp-mini-l">Dual Glue</div><div class="sp-mini-v">ระบบ 2 กาว</div></div><div class="sp-mini"><div class="sp-mini-l">Weight</div><div class="sp-mini-v">3,600 kg</div></div></div></div></div>
+      <div class="mach-card"><div class="mach-card-img-w"><img class="mach-card-img" src="https://5.imimg.com/data5/SELLER/Default/2022/4/LK/SE/BJ/14357928/nmc-112-cnc-router-9-kw-500x500.png" onerror="this.src='https://picsum.photos/seed/weeke/600/400'"><div class="mach-card-dept dn">CNC</div></div><div class="mach-card-body"><div class="mach-card-name">WEEKE OPTIMAT NMC112</div><div class="mach-card-cat">CNC Machining Center</div><div class="spec-minis"><div class="sp-mini"><div class="sp-mini-l">X Axis</div><div class="sp-mini-v">60 m/min</div></div><div class="sp-mini"><div class="sp-mini-l">Router RPM</div><div class="sp-mini-v">24,000</div></div><div class="sp-mini"><div class="sp-mini-l">Accuracy</div><div class="sp-mini-v">±0.1 mm</div></div><div class="sp-mini"><div class="sp-mini-l">Drill RPM</div><div class="sp-mini-v">8,000</div></div></div></div></div>
+      <div class="mach-card"><div class="mach-card-img-w"><img class="mach-card-img" src="https://files.hoechsmann.com/lexikon/img/full/scm_tech_z1_2010.jpg?v=1" onerror="this.src='https://picsum.photos/600/400?random=7'"><div class="mach-card-dept dn">CNC</div></div><div class="mach-card-body"><div class="mach-card-name">SCM TECH Z1</div><div class="mach-card-cat">CNC Machining Center</div><div class="spec-minis"><div class="sp-mini"><div class="sp-mini-l">Working Area</div><div class="sp-mini-v">3050×1250</div></div><div class="sp-mini"><div class="sp-mini-l">Spindle RPM</div><div class="sp-mini-v">24,000</div></div><div class="sp-mini"><div class="sp-mini-l">Tool Changer</div><div class="sp-mini-v">14 Tools</div></div><div class="sp-mini"><div class="sp-mini-l">Main Motor</div><div class="sp-mini-v">9.5 kW</div></div></div></div></div>
+      <div class="mach-card"><div class="mach-card-img-w"><img class="mach-card-img" src="https://files.hoechsmann.com/lexikon/img/full/scm_tech_z2_2015.png?v=4" onerror="this.src='https://picsum.photos/600/400?random=8'"><div class="mach-card-dept dn">CNC</div></div><div class="mach-card-body"><div class="mach-card-name">SCM TECH Z2</div><div class="mach-card-cat">CNC Machining Center</div><div class="spec-minis"><div class="sp-mini"><div class="sp-mini-l">XY Speed</div><div class="sp-mini-v">83 m/min</div></div><div class="sp-mini"><div class="sp-mini-l">Spindle RPM</div><div class="sp-mini-v">24,000</div></div><div class="sp-mini"><div class="sp-mini-l">Tool Changer</div><div class="sp-mini-v">18 Tools</div></div><div class="sp-mini"><div class="sp-mini-l">Main Motor</div><div class="sp-mini-v">12 kW</div></div></div></div></div>
+    </div>
+  </div>
+</section>
+<div class="divider"></div>
+
+<!-- ══ CUT ══ -->
+<section class="sec sec-darker" id="cut-section">
+  <div class="cont">
+    <div class="dept-hdr"><div class="dept-ico dic-cut">✂️</div><div><div class="dept-title">แผนกเครื่องตัด</div><div class="dept-sub">Beam Saw · Rack &amp; Pinion + AC Servo · Book Cut สูงสุด 6 แผ่น</div></div></div>
+    <div class="mach-det"><img class="mach-det-img" src="https://i.postimg.cc/g2vRn3zV/cur-cp.jpg" onerror="this.src='https://picsum.photos/seed/bs120/640/480'"><div class="mach-det-body"><div class="mach-det-name">CHAMP FOND BS-120</div><div class="mach-det-tag">Beam Saw · Panel Cutting Machine</div><table class="spec-tbl"><tr><td>ความสูงใบเลื่อยยกสูงสุด</td><td>120 mm</td></tr><tr><td>ขนาดใบเลื่อยหลัก</td><td>400 – 450 mm</td></tr><tr><td>ความเร็วรอบใบเลื่อย</td><td>4,200 – 4,800 rpm</td></tr><tr><td>ความเร็ว Saw Carriage</td><td>100 – 160 m/min</td></tr><tr><td>ความเร็วตัวดันไม้</td><td>สูงสุด 100 m/min</td></tr><tr><td>ระบบดันไม้</td><td>AC Servo</td></tr><tr><td>ระบบขับแท่นเลื่อย</td><td>Rack &amp; Pinion</td></tr><tr><td>ความแม่นยำการดัน</td><td>±0.1 mm</td></tr><tr><td>เวลา Cycle ตัดเฉลี่ย</td><td>15 – 40 วินาที/ชุด</td></tr><tr><td>แรงดันลม</td><td>6 – 8 bar</td></tr><tr><td>กำลังมอเตอร์ใบเลื่อย</td><td>15 – 18.5 kW</td></tr><tr><td>น้ำหนักเครื่อง</td><td>5,000 – 8,000 kg</td></tr></table></div></div>
+    <div class="mach-det"><img class="mach-det-img" src="https://i.postimg.cc/QMh75VVV/shelling.jpg" onerror="this.src='https://picsum.photos/seed/schelling/640/480'"><div class="mach-det-body"><div class="mach-det-name">SCHELLING FH4-330</div><div class="mach-det-tag">Beam Saw · High-Precision Panel Saw</div><table class="spec-tbl"><tr><td>Cutting Length</td><td>3,300 mm</td></tr><tr><td>Blade Projection</td><td>105 mm</td></tr><tr><td>ใบเลื่อยหลัก</td><td>360 mm</td></tr><tr><td>รอบใบเลื่อยหลัก</td><td>~4,800 rpm</td></tr><tr><td>Scoring Saw RPM</td><td>7,000 – 9,000 rpm</td></tr><tr><td>กำลังมอเตอร์หลัก</td><td>18 kW</td></tr><tr><td>ความเร็ววิ่งใบเลื่อย</td><td>5 – 120 m/min</td></tr><tr><td>Return Speed</td><td>สูงสุด 150 m/min</td></tr><tr><td>ความเร็วตัวดันไม้</td><td>90 – 100 m/min</td></tr><tr><td>Clamp Opening</td><td>105 mm</td></tr><tr><td>จำนวน Clamp</td><td>9 ชุด</td></tr><tr><td>Air Consumption</td><td>~1,000 L/min</td></tr><tr><td>Total Power</td><td>21 – 35 kW</td></tr></table></div></div>
+  </div>
+</section>
+
+<!-- ══ EDGE ══ -->
+<section class="sec sec-dark" id="edge-section">
+  <div class="cont">
+    <div class="dept-hdr"><div class="dept-ico dic-edge">⬜</div><div><div class="dept-title">แผนกเครื่องปิดขอบ</div><div class="dept-sub">Edge Banding · Feed Speed 12–24 m/min · Hot Melt Glue System</div></div></div>
+    <div class="mach-det"><img class="mach-det-img" src="https://i.postimg.cc/4xCVfWg1/hh.jpg" onerror="this.src='https://picsum.photos/640/480?random=10'"><div class="mach-det-body"><div class="mach-det-name">HUAHUA HH-506R</div><div class="mach-det-tag">Edge Bander · Automatic Hot Melt</div><table class="spec-tbl"><tr><td>Feed Speed</td><td>15 / 18 / 20 m/min</td></tr><tr><td>เวลาไม้ผ่านเครื่อง</td><td>18 – 28 วินาที</td></tr><tr><td>ความหนาเทป (PVC)</td><td>0.4 – 3 mm</td></tr><tr><td>ความหนาไม้</td><td>10 – 60 mm</td></tr><tr><td>Pressure Rollers</td><td>4 ชุด</td></tr><tr><td>Pre-Milling Motor</td><td>2.2 kW × 2</td></tr><tr><td>Trimming Motor RPM</td><td>~12,000 rpm</td></tr><tr><td>Corner Rounding RPM</td><td>12,000 – 18,000 rpm</td></tr><tr><td>Glue Pot Temperature</td><td>180 – 210°C</td></tr><tr><td>Working Pressure</td><td>0.65 MPa</td></tr><tr><td>Total Power</td><td>17 – 20 kW</td></tr></table></div></div>
+    <div class="mach-det"><img class="mach-det-img" src="https://i.postimg.cc/N0BXTLLg/aw.jpg" onerror="this.src='https://picsum.photos/640/480?random=11'"><div class="mach-det-body"><div class="mach-det-name">AW2M</div><div class="mach-det-tag">Edge Bander · Automatic Hot Melt</div><table class="spec-tbl"><tr><td>Feed Speed</td><td>15 / 18 / 20 m/min</td></tr><tr><td>ความหนาเทป (PVC)</td><td>0.4 – 3 mm</td></tr><tr><td>ความหนาไม้</td><td>10 – 60 mm</td></tr><tr><td>Pressure Rollers</td><td>4 ชุด</td></tr><tr><td>Pre-Milling Motor</td><td>2.2 kW × 2</td></tr><tr><td>Glue Pot Temperature</td><td>180 – 210°C</td></tr><tr><td>Working Pressure</td><td>0.65 MPa</td></tr><tr><td>Total Power</td><td>17 – 20 kW</td></tr></table></div></div>
+    <div class="mach-det"><img class="mach-det-img" src="https://i.postimg.cc/pdCFBxnq/cf.jpg" onerror="this.src='https://picsum.photos/640/480?random=12'"><div class="mach-det-body"><div class="mach-det-name">CHAMP FOND EB-7B</div><div class="mach-det-tag">Edge Bander · High Speed Belt Pressure</div><table class="spec-tbl"><tr><td>Feed Speed</td><td>12 – 24 m/min</td></tr><tr><td>ความหนาไม้</td><td>10 – 60 mm</td></tr><tr><td>เทป PVC</td><td>0.4 – 3 mm</td></tr><tr><td>Solid Wood</td><td>สูงสุด 5 mm</td></tr><tr><td>Corner Rounding RPM</td><td>12,000 – 18,000 rpm</td></tr><tr><td>Trimming RPM</td><td>~12,000 rpm</td></tr><tr><td>Pressure Beam</td><td>Belt Type</td></tr></table></div></div>
+    <div class="mach-det"><img class="mach-det-img" src="https://i.postimg.cc/2SFTL1rg/nanxing1.png" onerror="this.src='https://picsum.photos/640/480?random=13'"><div class="mach-det-body"><div class="mach-det-name">NANXING NB6IJ</div><div class="mach-det-tag">Edge Bander · Dual Glue System (งานเพ่)</div><table class="spec-tbl"><tr><td>Feed Speed</td><td>12 – 20 m/min</td></tr><tr><td>Bevel Angle</td><td>45°</td></tr><tr><td>Trimming RPM</td><td>~12,000 rpm</td></tr><tr><td>Scraping RPM</td><td>~9,000 rpm</td></tr><tr><td>Glue System</td><td>Dual Glue</td></tr><tr><td>Total Power</td><td>26 – 31 kW</td></tr><tr><td>น้ำหนักเครื่อง</td><td>3,200 – 3,600 kg</td></tr></table></div></div>
+  </div>
+</section>
+
+<!-- ══ CNC ══ -->
+<section class="sec sec-darker" id="cnc-section">
+  <div class="cont">
+    <div class="dept-hdr"><div class="dept-ico dic-cnc">🔩</div><div><div class="dept-title">แผนก CNC / Machining Center</div><div class="dept-sub">CNC Boring &amp; Routing · Vacuum Hold-Down · Multi-Spindle High Speed</div></div></div>
+    <div class="mach-det"><img class="mach-det-img" src="https://i.postimg.cc/4xztmpfv/weeke.png" onerror="this.src='https://picsum.photos/seed/weeke112/640/480'"><div class="mach-det-body"><div class="mach-det-name">WEEKE OPTIMAT NMC112</div><div class="mach-det-tag">CNC Machining Center · Dual Table</div><table class="spec-tbl"><tr><td>X Axis Speed</td><td>60 m/min</td></tr><tr><td>Y Axis Speed</td><td>50 m/min</td></tr><tr><td>Z Axis Speed</td><td>20 m/min</td></tr><tr><td>Drill RPM</td><td>~8,000 rpm</td></tr><tr><td>Router RPM</td><td>18,000 – 24,000 rpm</td></tr><tr><td>Tool Change Time</td><td>8 – 15 วินาที</td></tr><tr><td>Vacuum Pressure</td><td>200 – 250 mbar</td></tr><tr><td>Position Accuracy</td><td>±0.1 mm</td></tr></table></div></div>
+    <div class="mach-det"><img class="mach-det-img" src="https://i.postimg.cc/7Zv0HKk9/z1.jpg" onerror="this.src='https://picsum.photos/640/480?random=14'"><div class="mach-det-body"><div class="mach-det-name">SCM TECH Z1</div><div class="mach-det-tag">CNC Multi-Spindle Boring &amp; Routing</div><table class="spec-tbl"><tr><td>Working Area</td><td>3,050 × 1,250 × 180 mm</td></tr><tr><td>X-Y Speed</td><td>35 m/min</td></tr><tr><td>Vertical Drill</td><td>12 หัว</td></tr><tr><td>Horizontal Drill</td><td>6 หัว</td></tr><tr><td>Drill RPM</td><td>8,000 rpm</td></tr><tr><td>Main Spindle Power</td><td>9.5 kW</td></tr><tr><td>Spindle RPM</td><td>24,000 rpm</td></tr><tr><td>Tool Changer</td><td>14 Tools</td></tr></table></div></div>
+    <div class="mach-det"><img class="mach-det-img" src="https://i.postimg.cc/Dwqs81vd/z2.png" onerror="this.src='https://picsum.photos/640/480?random=15'"><div class="mach-det-body"><div class="mach-det-name">SCM TECH Z2</div><div class="mach-det-tag">CNC Multi-Spindle · High Speed 83 m/min</div><table class="spec-tbl"><tr><td>X-Y Speed</td><td>สูงสุด 83 m/min</td></tr><tr><td>Vertical Drill</td><td>18 หัว</td></tr><tr><td>Horizontal Drill</td><td>8 หัว</td></tr><tr><td>Drill RPM</td><td>8,000 rpm</td></tr><tr><td>Main Spindle Power</td><td>12 kW</td></tr><tr><td>Spindle RPM</td><td>24,000 rpm</td></tr><tr><td>Tool Changer</td><td>18 Tools</td></tr><tr><td>Vacuum Air Flow</td><td>3,400 m³/h</td></tr></table></div></div>
+  </div>
+</section>
+
+<!-- ══ CAPACITY DASHBOARD ══ -->
+<section class="sec sec-gray" id="capacity" style="padding-top:60px;padding-bottom:60px">
+  <div class="cont" style="margin-bottom:32px">
+    <div class="sec-tag">ระบบบริหารการผลิต</div>
+    <h2 class="sec-h">Capacity Management Dashboard</h2>
+    <p class="sec-p">กรอกค่าจากการสังเกตหน้างานจริงเพื่อคำนวณ Theory vs Actual และระบุคอขวด</p>
+  </div>
+  <div class="cap-wrap">
+    <div class="cap-embed-box">
+      <div id="cap-root">
+        <div class="wrap">
+          <div class="hdr">
+            <div><div class="hdr-t">ระบบบริหารกำลังการผลิต</div><div class="hdr-s">Capacity Management · Theory vs Actual · อุตสาหกรรมเฟอร์นิเจอร์</div></div>
+            <button class="save-btn" id="save-btn" onclick="saveData()">💾 บันทึกค่า</button>
+          </div>
+          <div class="card">
+            <div class="tabs">
+              <button class="tb a" id="t-sum" onclick="sw('sum')">📊 สรุป</button>
+              <button class="tb" id="t-cut" onclick="sw('cut')">✂️ ตัด</button>
+              <button class="tb" id="t-edge" onclick="sw('edge')">⬜ ปิดขอบ</button>
+              <button class="tb" id="t-drill" onclick="sw('drill')">🔩 เจาะ</button>
+              <button class="tb" id="t-rep" onclick="sw('rep')">📋 รายงาน</button>
+            </div>
+            <div class="tab-body">
+              <div id="tab-sum"></div>
+              <div id="tab-cut" style="display:none"></div>
+              <div id="tab-edge" style="display:none"></div>
+              <div id="tab-drill" style="display:none"></div>
+              <div id="tab-rep" style="display:none"></div>
+            </div>
+          </div>
+          <div class="cap-footer">Capacity Dashboard · กรอกค่าจากการสังเกตหน้างานจริงเพื่อผลลัพธ์ที่แม่นยำ</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ MAINTENANCE ══ -->
+<section class="sec sec-gray" id="maintenance" style="padding-top:60px;padding-bottom:80px">
+  <div class="cont" style="margin-bottom:32px">
+    <div class="sec-tag">การบำรุงรักษา</div>
+    <h2 class="sec-h">Preventive Maintenance & Tool System</h2>
+    <p class="sec-p">บันทึก PM ติดตามเวลาหยุดเครื่อง และจัดการอายุเครื่องมือตัดทุกแผนก</p>
+  </div>
+  <div class="cap-wrap">
+    <div class="cap-embed-box" id="maint-root">
+      <div class="maint-wrap">
+        <div style="max-width:960px;margin:0 auto;padding:0 16px">
+          <!-- Nav Tabs -->
+          <div style="display:flex;gap:2px;background:#e5e7eb;border-radius:10px;padding:4px;margin-bottom:20px">
+            <button onclick="mSwitchPage('dashboard')" id="mnav-dashboard" class="flex-1 py-2 px-3 rounded-lg text-xs font-semibold bg-white text-indigo-700 shadow-sm transition" style="background:white;color:#4338ca">📊 หน้าหลัก</button>
+            <button onclick="mSwitchPage('pm')" id="mnav-pm" class="flex-1 py-2 px-3 rounded-lg text-xs font-semibold text-gray-500 transition" style="background:transparent;color:#6b7280">🔧 บันทึก PM</button>
+            <button onclick="mSwitchPage('tools')" id="mnav-tools" class="flex-1 py-2 px-3 rounded-lg text-xs font-semibold text-gray-500 transition" style="background:transparent;color:#6b7280">⚙️ ทูล</button>
+            <button onclick="mSwitchPage('reports')" id="mnav-reports" class="flex-1 py-2 px-3 rounded-lg text-xs font-semibold text-gray-500 transition" style="background:transparent;color:#6b7280">📋 รายงาน</button>
+          </div>
+
+          <!-- Dashboard -->
+          <div id="mpage-dashboard">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+              <div class="bg-white p-3 rounded-xl shadow-sm border-l-4 border-emerald-500"><p class="text-xs text-gray-500">OEE รวมเฉลี่ย</p><p id="mkpi-oee" class="text-xl font-bold text-emerald-600">0%</p></div>
+              <div class="bg-white p-3 rounded-xl shadow-sm border-l-4 border-red-500"><p class="text-xs text-gray-500">Downtime รวม</p><p id="mkpi-downtime" class="text-xl font-bold text-red-600">0%</p></div>
+              <div class="bg-white p-3 rounded-xl shadow-sm border-l-4 border-amber-500"><p class="text-xs text-gray-500">ชิ้นงานที่หายไป</p><p id="mkpi-lost" class="text-xl font-bold text-amber-600">0 ชิ้น</p></div>
+              <div class="bg-white p-3 rounded-xl shadow-sm border-l-4 border-indigo-500"><p class="text-xs text-gray-500">ทูลต้องดูแลเร่งด่วน</p><p id="mkpi-tools" class="text-xl font-bold text-indigo-600">0 รายการ</p></div>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm mb-4">
+              <h3 class="text-sm font-semibold mb-3 text-gray-700">สาเหตุ Downtime สัปดาห์นี้ (%)</h3>
+              <div id="mchart-dt" class="space-y-2"></div>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm mb-4 overflow-x-auto">
+              <h3 class="text-sm font-semibold mb-3 text-gray-700">สถานะเครื่องจักร</h3>
+              <table class="w-full text-xs"><thead><tr class="bg-gray-100 text-gray-500 uppercase"><th class="p-2">เครื่องจักร</th><th class="p-2 text-center">สถานะ</th><th class="p-2 text-right">Downtime%</th><th class="p-2 text-right">สูญเสีย</th></tr></thead><tbody id="mtbl-machine"></tbody></table>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm overflow-x-auto">
+              <h3 class="text-sm font-semibold mb-3 text-gray-700">สถานะทูล</h3>
+              <table class="w-full text-xs"><thead><tr class="bg-gray-100 text-gray-500"><th class="p-2">ทูล / เครื่อง</th><th class="p-2 text-center">คุณภาพ</th><th class="p-2 text-center">ลับไปแล้ว</th><th class="p-2 text-center">สถานะ</th></tr></thead><tbody id="mtbl-tool"></tbody></table>
+            </div>
+          </div>
+
+          <!-- PM -->
+          <div id="mpage-pm" class="hidden">
+            <div class="bg-white p-4 rounded-xl shadow-sm mb-4">
+              <h3 class="text-sm font-semibold mb-3 text-indigo-900 border-b pb-2">บันทึกการทำ PM</h3>
+              <form onsubmit="mSavePM(event)" class="space-y-3">
+                <div><label class="block text-xs font-medium text-gray-700 mb-1">เลือกเครื่องจักร</label><select id="mpm-machine" class="w-full p-2 border rounded-lg text-sm" required></select></div>
+                <div><label class="block text-xs font-medium text-gray-700 mb-1">ความถี่</label>
+                  <select id="mpm-freq" class="w-full p-2 border rounded-lg text-sm" onchange="mUpdateChecklist()" required>
+                    <option value="รายวัน">รายวัน</option><option value="รายสัปดาห์">รายสัปดาห์</option><option value="รายเดือน">รายเดือน</option><option value="รายปี">รายปี</option>
+                  </select>
+                </div>
+                <div class="bg-gray-50 p-3 rounded-lg"><p class="text-xs font-bold text-gray-600 mb-2">Checklist:</p><div id="mpm-checklist" class="space-y-2 text-xs"></div></div>
+                <button type="submit" class="w-full bg-indigo-600 text-white text-sm font-medium py-2 rounded-lg">💾 บันทึก PM</button>
+              </form>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm">
+              <h3 class="text-sm font-semibold mb-3 text-red-900 border-b pb-2">บันทึก Downtime</h3>
+              <form onsubmit="mSaveDT(event)" class="space-y-3">
+                <div><label class="block text-xs font-medium text-gray-700 mb-1">เลือกเครื่องจักร</label><select id="mdt-machine" class="w-full p-2 border rounded-lg text-sm" required></select></div>
+                <div class="grid grid-cols-2 gap-2">
+                  <div><label class="block text-xs font-medium text-gray-700 mb-1">เวลาเริ่มหยุด</label><input type="datetime-local" id="mdt-start" class="w-full p-2 border rounded-lg text-xs" required></div>
+                  <div><label class="block text-xs font-medium text-gray-700 mb-1">เวลากลับมา</label><input type="datetime-local" id="mdt-end" class="w-full p-2 border rounded-lg text-xs" required></div>
+                </div>
+                <div><label class="block text-xs font-medium text-gray-700 mb-1">สาเหตุ</label>
+                  <select id="mdt-reason" class="w-full p-2 border rounded-lg text-sm" required>
+                    <option>เครื่องพัง</option><option>PM ตามแผน</option><option>เปลี่ยนหรือลับทูล</option><option>รอวัสดุ</option><option>อื่นๆ</option>
+                  </select>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <div><label class="block text-xs font-medium text-gray-700 mb-1">ชม.ทำงาน/วัน</label><input type="number" id="mdt-hrs" value="8" step="0.1" class="w-full p-2 border rounded-lg text-sm" required></div>
+                  <div><label class="block text-xs font-medium text-gray-700 mb-1">Capacity (ชิ้น/วัน)</label><input type="number" id="mdt-cap" value="500" class="w-full p-2 border rounded-lg text-sm" required></div>
+                </div>
+                <div><label class="block text-xs font-medium text-gray-700 mb-1">รายละเอียด</label><textarea id="mdt-detail" class="w-full p-2 border rounded-lg text-xs" rows="2"></textarea></div>
+                <button type="submit" class="w-full bg-red-600 text-white text-sm font-medium py-2 rounded-lg">⚡ บันทึก Downtime</button>
+              </form>
+            </div>
+          </div>
+
+          <!-- Tools -->
+          <div id="mpage-tools" class="hidden">
+            <div class="flex gap-2 mb-4">
+              <button onclick="mToolTab('saw')" id="mtab-saw" class="flex-1 py-2 text-xs font-semibold rounded-lg bg-white shadow text-gray-800">ใบเลื่อย</button>
+              <button onclick="mToolTab('drill')" id="mtab-drill" class="flex-1 py-2 text-xs font-semibold rounded-lg bg-gray-200 text-gray-600">ดอกเจาะ</button>
+              <button onclick="mToolTab('trim')" id="mtab-trim" class="flex-1 py-2 text-xs font-semibold rounded-lg bg-gray-200 text-gray-600">ใบตัดขอบ</button>
+            </div>
+            <div class="flex gap-2 mb-4">
+              <button onclick="mOpenToolModal('use')" class="flex-1 bg-indigo-600 text-white text-xs py-2 rounded-lg font-medium">🔨 บันทึกการใช้งาน</button>
+              <button onclick="mOpenToolModal('sharpen')" class="flex-1 bg-amber-500 text-white text-xs py-2 rounded-lg font-medium">✨ บันทึกการลับคม</button>
+            </div>
+            <div id="mtool-cards" class="space-y-4"></div>
+          </div>
+
+          <!-- Reports -->
+          <div id="mpage-reports" class="hidden">
+            <div class="bg-white p-4 rounded-xl shadow-sm mb-4">
+              <h3 class="text-sm font-semibold mb-3 text-gray-700">ประวัติ Downtime</h3>
+              <div class="overflow-x-auto max-h-60 text-xs">
+                <table class="w-full text-left"><thead><tr class="bg-gray-100 text-gray-500"><th class="p-2">เครื่องจักร</th><th class="p-2">สาเหตุ</th><th class="p-2 text-right">นาที</th><th class="p-2">วันที่</th></tr></thead><tbody id="mrep-dt"></tbody></table>
+              </div>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm mb-4">
+              <h3 class="text-sm font-semibold mb-3 text-gray-700">ประวัติลับคม / เปลี่ยนทูล</h3>
+              <div class="overflow-x-auto max-h-60 text-xs">
+                <table class="w-full text-left"><thead><tr class="bg-gray-100 text-gray-500"><th class="p-2">ทูล</th><th class="p-2">ประเภท</th><th class="p-2">รายละเอียด</th><th class="p-2">วันที่</th></tr></thead><tbody id="mrep-tool"></tbody></table>
+              </div>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm">
+              <h3 class="text-sm font-semibold mb-3 text-gray-700">ตั้งค่า Wear Multiplier</h3>
+              <div class="space-y-2 text-xs">
+                <div class="flex justify-between items-center bg-gray-50 p-2 rounded"><span>ต่ำ (PB, ไม้จริง)</span><input type="number" id="mmult-low" step="0.1" value="1.0" onchange="mSaveMult()" class="w-16 p-1 border rounded text-center"></div>
+                <div class="flex justify-between items-center bg-gray-50 p-2 rounded"><span>ปานกลาง (MDF, HMR)</span><input type="number" id="mmult-med" step="0.1" value="1.5" onchange="mSaveMult()" class="w-16 p-1 border rounded text-center"></div>
+                <div class="flex justify-between items-center bg-gray-50 p-2 rounded"><span>สูง (เมลามีน, ลามิเนต)</span><input type="number" id="mmult-high" step="0.1" value="2.0" onchange="mSaveMult()" class="w-16 p-1 border rounded text-center"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FOOTER ══ -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="footer-brand-icon">🏭</div>
+      <div><div class="footer-brand-name">Factory Management System</div><div class="footer-brand-sub">Furniture Production · Capacity & Maintenance</div></div>
+    </div>
+    <div class="footer-copy">© 2025 · ระบบบริหารโรงงานเฟอร์นิเจอร์</div>
+  </div>
+</footer>
+
+<!-- ══ TOOL MODAL ══ -->
+<div id="mtool-modal" class="fixed inset-0 bg-black/50 z-[2000] flex items-center justify-center p-4 hidden">
+  <div class="bg-white p-5 rounded-2xl w-full max-w-sm">
+    <h3 id="mtool-modal-title" class="text-md font-bold mb-4 text-indigo-900">บันทึกทูล</h3>
+    <form onsubmit="mSubmitTool(event)" class="space-y-3">
+      <input type="hidden" id="mtool-action-type">
+      <div><label class="block text-xs font-medium text-gray-700 mb-1">เลือกทูล</label><select id="mtool-select" class="w-full p-2 border rounded-lg text-xs" required onchange="mAdjustQtyLabel()"></select></div>
+      <div id="mtool-use-fields">
+        <div><label class="block text-xs font-medium text-gray-700 mb-1">วัสดุที่ตัด/เจาะ</label>
+          <select id="mtool-material" class="w-full p-2 border rounded-lg text-xs">
+            <option value="ต่ำ">ต่ำ (PB, ไม้จริง)</option><option value="ปานกลาง">ปานกลาง (MDF, HMR)</option><option value="สูง">สูง (เมลามีน, ลามิเนต)</option>
+          </select>
+        </div>
+        <div><label id="mtool-qty-label" class="block text-xs font-medium text-gray-700 mb-1 mt-2">จำนวนที่ใช้</label><input type="number" id="mtool-qty" value="100" class="w-full p-2 border rounded-lg text-sm"></div>
+      </div>
+      <div id="mtool-sharpen-fields" class="hidden">
+        <label class="block text-xs font-medium text-gray-700 mb-1">ประเภท</label>
+        <select id="mtool-sharpen-type" class="w-full p-2 border rounded-lg text-xs">
+          <option value="sharpen">ส่งลับคม</option><option value="replace">เปลี่ยนทูลใหม่</option>
+        </select>
+      </div>
+      <div class="flex gap-2 mt-4">
+        <button type="button" onclick="document.getElementById('mtool-modal').classList.add('hidden')" class="flex-1 bg-gray-200 text-gray-800 text-xs py-2 rounded-lg">ยกเลิก</button>
+        <button type="submit" class="flex-1 bg-indigo-600 text-white text-xs py-2 rounded-lg font-medium">ตกลงบันทึก</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════
+   NAV SCROLL
+═══════════════════════════════════ */
+window.addEventListener('scroll',function(){
+  var nav=document.getElementById('main-nav');
+  nav.classList.toggle('scrolled',window.scrollY>40);
+  var secs=['machines','cut-section','edge-section','cnc-section','capacity','maintenance'];
+  var nids=['nav-machines','nav-cut','nav-edge','nav-cnc','nav-cap','nav-maint'];
+  var cur='';
+  secs.forEach(function(id){var el=document.getElementById(id);if(el&&window.scrollY>=el.offsetTop-100)cur=id;});
+  nids.forEach(function(id){var el=document.getElementById(id);if(el)el.classList.remove('active');});
+  var idx=secs.indexOf(cur);if(idx>=0){var el=document.getElementById(nids[idx]);if(el)el.classList.add('active');}
+});
+
+/* ═══════════════════════════════════
+   CAPACITY DASHBOARD
+═══════════════════════════════════ */
+Chart.register(ChartDataLabels);
+var CUR='sum',ST={sumCs:1,sumDs:1,sumEs:4,sumPattern:'4_all'},charts={};
+var f=function(n){return Math.round(n).toLocaleString('th-TH');};
+var fd=function(n,d){return(+n).toFixed(d);};
+var fv=function(id){var el=document.getElementById(id);return el?(parseFloat(el.value)||0):0;};
+var pct=function(a,t){return t>0?Math.round(a/t*100):0;};
+var CUT=[
+  {id:'c0',name:'CHAMP FOND BS-120',org:'Saw 100–160 ม./นาที · Book Cut 5–6 แผ่น',col:'#378ADD',hrs:8,lossMin:45,sc:[{ct:1.1,stk:6,pps:2.5},{ct:2.5,stk:6,pps:10},{ct:6.0,stk:6,pps:20}]},
+  {id:'c1',name:'SCHELLING FH 4 330',org:'Saw 0–120 ม./นาที · Book Cut 4–5 แผ่น',col:'#9055C0',hrs:8,lossMin:45,sc:[{ct:1.1,stk:5,pps:2.5},{ct:2.5,stk:5,pps:10},{ct:6.0,stk:5,pps:20}]}
+];
+var EDGE=[
+  {id:'e0',name:'AUTOMA EBT/8CP(S)',org:'Feed 12–20 ม./นาที',col:'#1D9E75',hrs:8,lossMin:75,spd:20,gap:500,handling:3.5,L:1200,W:800,sides:4,pattern:'4_all',status:'active'},
+  {id:'e1',name:'AW2M',org:'Feed 12–20 ม./นาที',col:'#17B087',hrs:8,lossMin:75,spd:20,gap:500,handling:3.5,L:1200,W:800,sides:4,pattern:'4_all',status:'active'},
+  {id:'e2',name:'CHAMP FOND EB-7B',org:'Feed 12–24 ม./นาที',col:'#12C4A0',hrs:8,lossMin:75,spd:20,gap:500,handling:3.5,L:1200,W:800,sides:4,pattern:'4_all',status:'active'},
+  {id:'e3',name:'NANXING NB6IJ',org:'Feed 12–16 ม./นาที',col:'#22D8B8',hrs:8,lossMin:75,spd:16,gap:700,handling:3.5,L:1200,W:800,sides:4,pattern:'4_all',status:'active'}
+];
+var DRILL=[
+  {id:'d0',name:'WEEKE OPTIMAT NMC112',org:'CNC · Axis 50 ม./นาที',col:'#BA7517',hrs:8,lossMin:35,axisSpd:50,tpHole:0.25,spacing:32,woodL:600,woodW:400,loadTime:5,sc:[{holes:8},{holes:20},{holes:40}]},
+  {id:'d1',name:'SCM TECH Z2',org:'Multi-Spindle · Axis 40 ม./นาที',col:'#D08A26',hrs:8,lossMin:35,axisSpd:40,tpHole:0.35,spacing:32,woodL:600,woodW:400,loadTime:6,sc:[{holes:8},{holes:20},{holes:40}]},
+  {id:'d2',name:'SCM TECH Z1',org:'Multi-Spindle · Axis 35 ม./นาที',col:'#E6A63A',hrs:8,lossMin:35,axisSpd:35,tpHole:0.40,spacing:32,woodL:600,woodW:400,loadTime:7,sc:[{holes:8},{holes:20},{holes:40}]}
+];
+var SC=['งานง่าย','งานปานกลาง','งานยาก'],SC_SHORT=['ง่าย','กลาง','ยาก'],SC_DRILL=['ง่าย (8 รู)','กลาง (20 รู)','ยาก (40 รู)'];
+var PATTERNS={1:[{v:'1_L',t:'ปิดด้านยาว L'},{v:'1_W',t:'ปิดด้านกว้าง W'}],2:[{v:'2_L',t:'ปิด 2 ด้านยาว'},{v:'2_W',t:'ปิด 2 ด้านกว้าง'},{v:'2_LW',t:'ยาว+กว้าง'}],3:[{v:'3_2L1W',t:'2L+1W'},{v:'3_1L2W',t:'1L+2W'}],4:[{v:'4_all',t:'ปิดครบ 4 ด้าน'}]};
+function mk(tag,attrs,inner){var el=document.createElement(tag);if(attrs)Object.keys(attrs).forEach(function(k){if(k==='cls')el.className=attrs[k];else el.setAttribute(k,attrs[k]);});if(inner!==undefined)el.innerHTML=inner;return el;}
+function mkI(id,val,step,mn,lbl,unit,isAct){var w=mk('div',{cls:'iw'});w.appendChild(mk('div',{cls:'il'+(isAct?' note':'')},lbl));var row=mk('div',{cls:'irow'+(isAct?' act':'')});var el=mk('input',{class:'inp',type:'number',id:id,value:val,step:step||'any',min:mn||0});el.oninput=recalcAll;row.appendChild(el);if(unit)row.appendChild(mk('span',{cls:'iu'},unit));w.appendChild(row);return w;}
+function mkPill(m,isLoss){var p=mk('div',{cls:'pill'+(isLoss?' loss':'')});p.appendChild(mk('span',{cls:'pill-lbl'},isLoss?'เวลาสูญเสีย:':'เวลาทำงาน:'));var el=mk('input',{type:'number',class:'pill-inp',id:m.id+(isLoss?'-lossMin':'-hrs'),value:isLoss?m.lossMin:m.hrs,min:0,max:isLoss?1440:24,step:1});el.oninput=recalcAll;p.appendChild(el);p.appendChild(mk('span',{cls:'pill-u'},isLoss?'นาที/วัน':'ชม./วัน'));return p;}
+function mkMHdr(m){var hdr=mk('div',{cls:'mhdr'});var left=mk('div');left.appendChild(mk('div',{cls:'mname'},m.name));left.appendChild(mk('div',{cls:'morg'},m.org));hdr.appendChild(left);var pills=mk('div',{cls:'pills'});pills.appendChild(mkPill(m,false));pills.appendChild(mkPill(m,true));hdr.appendChild(pills);return hdr;}
+function killChart(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
+function isDark(){return window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches;}
+function cc(){return{t:isDark()?'#c0c0b8':'#2b2b28',g:isDark()?'rgba(255,255,255,0.07)':'rgba(0,0,0,0.06)'};}
+function grouped(id,labels,ds,noLabel){killChart(id);var ctx=document.getElementById(id);if(!ctx)return;var c=cc();charts[id]=new Chart(ctx,{type:'bar',data:{labels:labels,datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:c.t,font:{size:11,weight:'600'},boxWidth:11}},datalabels:{display:noLabel?false:function(ctx){return ctx.datasetIndex===1;},anchor:'end',align:'top',font:{weight:'800',size:10},formatter:function(v){return f(v);},color:function(ctx){return ctx.dataset.backgroundColor||'#888';}}},scales:{x:{grid:{color:c.g},ticks:{color:c.t,font:{size:11,weight:'600'}}},y:{grid:{color:c.g},ticks:{color:c.t,font:{size:10}},beginAtZero:true}}}});}
+function parsePat(p,Lmm,Wmm){var L=Lmm/1000,W=Wmm/1000,ps=[],lm=0;if(p==='1_L'){ps=[L];lm=L;}else if(p==='1_W'){ps=[W];lm=W;}else if(p==='2_L'){ps=[L,L];lm=2*L;}else if(p==='2_W'){ps=[W,W];lm=2*W;}else if(p==='2_LW'){ps=[L,W];lm=L+W;}else if(p==='3_2L1W'){ps=[L,L,W];lm=2*L+W;}else if(p==='3_1L2W'){ps=[L,W,W];lm=L+2*W;}else{ps=[L,L,W,W];lm=2*(L+W);}return{passes:ps,lm:lm};}
+function calcEdge(m,pat,overStat){var stat=overStat||(document.getElementById(m.id+'-status')?document.getElementById(m.id+'-status').value:m.status);if(stat==='inactive')return{tgtPcs:0,actPcs:0,tgtM:0,actM:0,inactive:true};var tgt=fv(m.id+'-hrs')*60,act=Math.max(0,tgt-fv(m.id+'-lossMin'));var spd=fv(m.id+'-spd')||1,gapM=(fv(m.id+'-gap')||0)/1000,hand=fv(m.id+'-handling')||0;var p=parsePat(pat,fv(m.id+'-L')||1000,fv(m.id+'-W')||600);var tgtSec=0;p.passes.forEach(function(l){tgtSec+=spd>0?((l+gapM)/spd)*60:0;});var actSec=0,handSec=0;p.passes.forEach(function(l,i){actSec+=spd>0?((l+gapM)/spd)*60:0;if(i>0)handSec+=hand;});var actCt=actSec+handSec;return{tgtPcs:tgtSec>0?Math.floor(tgt*60/tgtSec):0,actPcs:actCt>0?Math.floor(act*60/actCt):0,tgtM:Math.round((tgtSec>0?Math.floor(tgt*60/tgtSec):0)*p.lm*100)/100,actM:Math.round((actCt>0?Math.floor(act*60/actCt):0)*p.lm*100)/100,ct:Math.round(actCt*10)/10,inactive:false};}
+function calcCut(m,si){var tgt=fv(m.id+'-hrs')*60,act=Math.max(0,tgt-fv(m.id+'-lossMin'));var ct=fv(m.id+'-s'+si+'-ct')||0.01,stk=fv(m.id+'-s'+si+'-stk')||1,pps=fv(m.id+'-s'+si+'-pps')||1;return{tgtPcs:ct>0?Math.floor(tgt/ct*stk*pps):0,actPcs:ct>0?Math.floor(act/ct*stk*pps):0};}
+function calcDrill(m,si){var tgt=fv(m.id+'-hrs')*60,act=Math.max(0,tgt-fv(m.id+'-lossMin'));var axisSpd=fv(m.id+'-axisSpd')||1,axisSpdMs=axisSpd/60,tpHole=fv(m.id+'-tpHole')||0.1,spacing=(fv(m.id+'-spacing')||32)/1000,woodL=(fv(m.id+'-woodL')||600)/1000,loadTime=fv(m.id+'-loadTime')||0,holes=fv(m.id+'-s'+si+'-holes')||1;var tPM=axisSpdMs>0?spacing/axisSpdMs:0,iPos=axisSpdMs>0?woodL/axisSpdMs:0;var ctT=iPos+(holes*tpHole)+Math.max(0,holes-1)*tPM+loadTime;return{tgtPcs:ctT>0?Math.floor(tgt*60/ctT):0,actPcs:ctT>0?Math.floor(act*60/ctT):0,tgtHoles:ctT>0?Math.floor(tgt*60/ctT)*holes:0,actHoles:ctT>0?Math.floor(act*60/ctT)*holes:0,ctTheory:ctT,travelPerMove:tPM,initPos:iPos,holes:holes};}
+function syncState(){CUT.forEach(function(m){m.hrs=fv(m.id+'-hrs')||m.hrs;m.lossMin=fv(m.id+'-lossMin');[0,1,2].forEach(function(si){['ct','stk','pps'].forEach(function(k){if(document.getElementById(m.id+'-s'+si+'-'+k))m.sc[si][k]=fv(m.id+'-s'+si+'-'+k);});});});EDGE.forEach(function(m){m.hrs=fv(m.id+'-hrs')||m.hrs;m.lossMin=fv(m.id+'-lossMin');var st=document.getElementById(m.id+'-status');if(st)m.status=st.value;['spd','gap','handling','L','W'].forEach(function(k){if(document.getElementById(m.id+'-'+k))m[k]=fv(m.id+'-'+k);});var ps=document.getElementById(m.id+'-pat');if(ps)m.pattern=ps.value;});DRILL.forEach(function(m){m.hrs=fv(m.id+'-hrs')||m.hrs;m.lossMin=fv(m.id+'-lossMin');['axisSpd','tpHole','spacing','woodL','woodW','loadTime'].forEach(function(k){if(document.getElementById(m.id+'-'+k))m[k]=fv(m.id+'-'+k);});[0,1,2].forEach(function(si){if(document.getElementById(m.id+'-s'+si+'-holes'))m.sc[si].holes=fv(m.id+'-s'+si+'-holes');});});}
+function saveData(){syncState();var d={CUT:CUT.map(function(m){return{hrs:m.hrs,lossMin:m.lossMin,sc:m.sc.slice()};}),EDGE:EDGE.map(function(m){return{hrs:m.hrs,lossMin:m.lossMin,spd:m.spd,gap:m.gap,handling:m.handling,L:m.L,W:m.W,status:m.status,sides:m.sides,pattern:m.pattern};}),DRILL:DRILL.map(function(m){return{hrs:m.hrs,lossMin:m.lossMin,axisSpd:m.axisSpd,tpHole:m.tpHole,spacing:m.spacing,woodL:m.woodL,woodW:m.woodW,loadTime:m.loadTime,sc:m.sc.slice()};}),ST:ST};try{localStorage.setItem('cap4',JSON.stringify(d));var btn=document.getElementById('save-btn');if(btn){btn.className='save-btn saved';btn.textContent='✓ บันทึกแล้ว';setTimeout(function(){btn.className='save-btn';btn.textContent='💾 บันทึกค่า';},2000);}}catch(e){}}
+function loadData(){try{var raw=localStorage.getItem('cap4');if(!raw)return;var d=JSON.parse(raw);if(d.CUT)d.CUT.forEach(function(dd,i){if(CUT[i])Object.assign(CUT[i],dd);});if(d.EDGE)d.EDGE.forEach(function(dd,i){if(EDGE[i])Object.assign(EDGE[i],dd);});if(d.DRILL)d.DRILL.forEach(function(dd,i){if(DRILL[i])Object.assign(DRILL[i],dd);});if(d.ST)Object.assign(ST,d.ST);}catch(e){}}
+function buildCut(){var cont=document.getElementById('tab-cut');cont.innerHTML='';cont.appendChild(mk('p',{cls:'cap-sec'},'Theory = สเปกเครื่อง · Actual = หักเวลาสูญเสีย'));CUT.forEach(function(m){var card=mk('div',{cls:'mcard'});var bar=mk('div',{cls:'mbar'});bar.style.background=m.col;card.appendChild(bar);card.appendChild(mkMHdr(m));var sg=mk('div',{cls:'sc-grid'});SC.forEach(function(sn,si){var box=mk('div',{cls:'sc-box'});box.appendChild(mk('div',{cls:'sc-title'},SC_SHORT[si]+' — '+sn));var g=mk('div',{cls:'ig-col'});g.appendChild(mkI(m.id+'-s'+si+'-ct',m.sc[si].ct,0.05,0.05,'Cycle Time/Stack (นาที)'));g.appendChild(mkI(m.id+'-s'+si+'-stk',m.sc[si].stk,1,1,'ซ้อนตัด (แผ่น)'));g.appendChild(mkI(m.id+'-s'+si+'-pps',m.sc[si].pps,0.5,0.5,'ชิ้น/แผ่น'));box.appendChild(g);box.appendChild(mk('div',{cls:'dv',style:'margin:9px 0'}));box.appendChild(mk('div',{id:m.id+'-sc'+si+'-res',cls:'ig2'}));sg.appendChild(box);});card.appendChild(sg);var cw=mk('div',{cls:'chart-box med'});cw.appendChild(mk('canvas',{id:'ch-cut-'+m.id}));card.appendChild(cw);cont.appendChild(card);});var tot=mk('div',{cls:'totbox',style:'margin-top:4px'});tot.appendChild(mk('div',{style:'font-size:12px;font-weight:700;color:var(--ts);margin-bottom:9px'},'รวม 2 เครื่อง'));tot.appendChild(mk('div',{id:'cut-tot',cls:'totgrid'}));cont.appendChild(tot);}
+function buildEdge(){var cont=document.getElementById('tab-edge');cont.innerHTML='';cont.appendChild(mk('p',{cls:'cap-sec'},'Theory = รวม Gap · Actual = รวม Gap + หมุน + หักเวลาสูญเสีย'));EDGE.forEach(function(m){var card=mk('div',{cls:'mcard'});var bar=mk('div',{cls:'mbar'});bar.style.background=m.col;card.appendChild(bar);card.appendChild(mkMHdr(m));var ctrl=mk('div',{cls:'edge-ctrl'});var sideDiv=mk('div');sideDiv.appendChild(mk('div',{cls:'ctrl-lbl'},'จำนวนด้าน'));var sRow=mk('div',{style:'display:flex;gap:5px'});[1,2,3,4].forEach(function(n){var b=mk('button',{cls:'emb'+(n===m.sides?' a':''),id:m.id+'-btn-'+n},n+' ด้าน');(function(nn){b.onclick=function(){syncState();m.sides=nn;m.pattern=PATTERNS[nn][0].v;buildEdge();recalcAll();};})(n);sRow.appendChild(b);});sideDiv.appendChild(sRow);ctrl.appendChild(sideDiv);var patDiv=mk('div',{style:'flex:1;min-width:180px'});patDiv.appendChild(mk('div',{cls:'ctrl-lbl'},'รูปแบบด้านที่ปิด'));var pRow=mk('div',{cls:'sel-row'});var pSel=mk('select',{class:'sel-sm',id:m.id+'-pat'});(function(mm){pSel.onchange=function(){mm.pattern=pSel.value;recalcAll();};})(m);pRow.appendChild(pSel);patDiv.appendChild(pRow);ctrl.appendChild(patDiv);card.appendChild(ctrl);var g=mk('div',{cls:'ig6'});var sw2=mk('div',{cls:'iw'});sw2.appendChild(mk('div',{cls:'il'},'สถานะ'));var sr=mk('div',{cls:'sel-row'});var ss=mk('select',{class:'sel-sm',id:m.id+'-status'});var ao=mk('option',{value:'active'},'🟢 ใช้งาน');var io=mk('option',{value:'inactive'},'🔴 ปิด');if(m.status==='inactive')io.setAttribute('selected','selected');ss.onchange=recalcAll;ss.appendChild(ao);ss.appendChild(io);sr.appendChild(ss);sw2.appendChild(sr);g.appendChild(sw2);g.appendChild(mkI(m.id+'-spd',m.spd,0.5,1,'Speed สายพาน','ม./นาที'));g.appendChild(mkI(m.id+'-gap',m.gap,10,0,'Gap ระหว่างไม้','มม.'));g.appendChild(mkI(m.id+'-handling',m.handling,0.5,0,'เวลาหมุน/รอบ','วิ.'));g.appendChild(mkI(m.id+'-L',m.L,1,100,'ยาว L','มม.'));g.appendChild(mkI(m.id+'-W',m.W,1,100,'กว้าง W','มม.'));card.appendChild(g);card.appendChild(mk('div',{cls:'dv'}));card.appendChild(mk('div',{id:m.id+'-out',cls:'ig4'}));cont.appendChild(card);refillPat(m.id,m.sides,m.pattern);});var sc=mk('div',{cls:'mcard'});sc.appendChild(mk('div',{cls:'cap-sec',style:'margin-top:0'},'เปรียบเทียบ Actual ทั้ง 4 เครื่อง'));var cw=mk('div',{cls:'chart-box',style:'height:200px'});cw.appendChild(mk('canvas',{id:'ch-edge-sum'}));sc.appendChild(cw);cont.appendChild(sc);}
+function refillPat(mid,n,cur){var sel=document.getElementById(mid+'-pat');if(!sel)return;var list=PATTERNS[n]||[];var found=list.some(function(p){return p.v===cur;});sel.innerHTML='';list.forEach(function(p){var o=mk('option',{value:p.v},p.t);if(p.v===(found?cur:list[0].v))o.setAttribute('selected','selected');sel.appendChild(o);});}
+function buildDrill(){var cont=document.getElementById('tab-drill');cont.innerHTML='';cont.appendChild(mk('p',{cls:'cap-sec'},'CT = ตำแหน่งเริ่ม + (รู × เวลา/รู) + (รู-1) × เวลาเคลื่อนที่ + โหลดไม้'));DRILL.forEach(function(m){var card=mk('div',{cls:'mcard'});var bar=mk('div',{cls:'mbar'});bar.style.background=m.col;card.appendChild(bar);card.appendChild(mkMHdr(m));cont.appendChild(card);card.appendChild(mk('p',{style:'font-size:10px;font-weight:700;color:var(--ti);text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px'},'⚙️ สเปกเครื่องจักร'));var g1=mk('div',{cls:'ig4'});g1.appendChild(mkI(m.id+'-axisSpd',m.axisSpd,1,1,'ความเร็วแกน CNC','ม./นาที'));g1.appendChild(mkI(m.id+'-tpHole',m.tpHole,0.05,0.05,'เวลาเจาะ/รู','วิ.'));g1.appendChild(mkI(m.id+'-spacing',m.spacing,1,1,'ระยะห่างรู','มม.'));g1.appendChild(mkI(m.id+'-loadTime',m.loadTime,0.5,0,'⏱ เวลาโหลดไม้','วิ.'));card.appendChild(g1);var g2=mk('div',{cls:'ig2',style:'max-width:300px'});g2.appendChild(mkI(m.id+'-woodL',m.woodL,1,100,'ยาว L','มม.'));g2.appendChild(mkI(m.id+'-woodW',m.woodW,1,100,'กว้าง W','มม.'));card.appendChild(g2);card.appendChild(mk('div',{id:m.id+'-formula',style:'font-size:10px;color:var(--tt);background:var(--bs);border-radius:5px;padding:6px 9px;margin:8px 0;font-weight:500'},''));card.appendChild(mk('div',{cls:'dv'}));var sg=mk('div',{cls:'sc-grid'});SC.forEach(function(sn,si){var box=mk('div',{cls:'sc-box'});box.appendChild(mk('div',{cls:'sc-title w'},SC_SHORT[si]+' — '+sn));var g=mk('div',{cls:'ig-col'});g.appendChild(mkI(m.id+'-s'+si+'-holes',m.sc[si].holes,1,1,'จำนวนรู/ชิ้น','รู'));box.appendChild(g);box.appendChild(mk('div',{cls:'dv',style:'margin:9px 0'}));box.appendChild(mk('div',{id:m.id+'-ds'+si+'-res',cls:'ig2'}));sg.appendChild(box);});card.appendChild(sg);var cw=mk('div',{cls:'chart-box med',style:'margin-top:10px'});cw.appendChild(mk('canvas',{id:'ch-drill-'+m.id}));card.appendChild(cw);});var tot=mk('div',{cls:'mcard'});tot.appendChild(mk('div',{cls:'mbar',style:'background:var(--bdt)'}));tot.appendChild(mk('div',{style:'font-size:12px;font-weight:700;color:var(--ts);margin-bottom:10px'},'รวม 3 เครื่อง'));tot.appendChild(mk('div',{id:'drill-tot-grid',style:'display:grid;grid-template-columns:repeat(3,1fr);gap:8px'}));document.getElementById('tab-drill').appendChild(tot);}
+function buildSum(){var cont=document.getElementById('tab-sum');cont.innerHTML='';cont.appendChild(mk('div',{cls:'ctrl-row',id:'sum-ctrl'}));cont.appendChild(mk('p',{cls:'cap-sec'},'KPI หลัก'));cont.appendChild(mk('div',{cls:'kpi-row',id:'sum-kpi'}));cont.appendChild(mk('p',{cls:'cap-sec'},'การไหลและคอขวด'));cont.appendChild(mk('div',{cls:'flow',id:'sum-flow'}));cont.appendChild(mk('div',{cls:'cnote',id:'sum-note'}));cont.appendChild(mk('p',{cls:'cap-sec'},'Theory vs Actual รายแผนก'));var cw=mk('div',{cls:'chart-box tall'});cw.appendChild(mk('canvas',{id:'ch-compare'}));cont.appendChild(cw);cont.appendChild(mk('p',{cls:'cap-sec'},'Scorecard'));cont.appendChild(mk('div',{id:'sum-table'}));renderSumCtrl();}
+function renderSumCtrl(){var ctrl=document.getElementById('sum-ctrl');if(!ctrl)return;ctrl.innerHTML='';function mkSeg(lbl,prefix,cur,cb){var d=mk('div');d.appendChild(mk('div',{cls:'ctrl-lbl',style:'font-size:10px;font-weight:800;color:var(--ts);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em'},lbl));var row=mk('div',{style:'display:flex;gap:4px'});SC_SHORT.forEach(function(t,i){var b=mk('button',{cls:'emb'+(cur===i?' a':''),id:prefix+i},t);(function(ii){b.onclick=function(){cb(ii);};})(i);row.appendChild(b);});d.appendChild(row);return d;}ctrl.appendChild(mkSeg('งานตัด','sum-cs',ST.sumCs,function(i){ST.sumCs=i;[0,1,2].forEach(function(k){var b=document.getElementById('sum-cs'+k);if(b)b.className='emb'+(k===i?' a':'');});recalcAll();}));var edDiv=mk('div');edDiv.appendChild(mk('div',{cls:'ctrl-lbl',style:'font-size:10px;font-weight:800;color:var(--ts);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em'},'ด้านปิดขอบ'));var eRow=mk('div',{style:'display:flex;gap:4px'});[1,2,3,4].forEach(function(n){var b=mk('button',{cls:'emb'+(ST.sumEs===n?' a':''),id:'sum-es'+n},n+'ด้าน');(function(nn){b.onclick=function(){ST.sumEs=nn;[1,2,3,4].forEach(function(k){var el=document.getElementById('sum-es'+k);if(el)el.className='emb'+(k===nn?' a':'');});refillSumPat();var ps=document.getElementById('sum-pat');if(ps)ST.sumPattern=ps.value;recalcAll();};})(n);eRow.appendChild(b);});edDiv.appendChild(eRow);ctrl.appendChild(edDiv);var patDiv=mk('div',{style:'min-width:180px'});patDiv.appendChild(mk('div',{cls:'ctrl-lbl',style:'font-size:10px;font-weight:800;color:var(--ts);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em'},'รูปแบบด้าน'));var pRow=mk('div',{cls:'sel-row',style:'width:180px'});var pSel=mk('select',{class:'sel-sm',id:'sum-pat'});pSel.onchange=function(){ST.sumPattern=pSel.value;recalcAll();};pRow.appendChild(pSel);patDiv.appendChild(pRow);ctrl.appendChild(patDiv);ctrl.appendChild(mkSeg('งานเจาะ','sum-ds',ST.sumDs,function(i){ST.sumDs=i;[0,1,2].forEach(function(k){var b=document.getElementById('sum-ds'+k);if(b)b.className='emb'+(k===i?' a':'');});recalcAll();}));refillSumPat();}
+function refillSumPat(){var sel=document.getElementById('sum-pat');if(!sel)return;var cur=sel.value||ST.sumPattern;var list=PATTERNS[ST.sumEs]||[];var found=list.some(function(p){return p.v===cur;});sel.innerHTML='';list.forEach(function(p){var o=mk('option',{value:p.v},p.t);if(p.v===(found?cur:list[0].v))o.setAttribute('selected','selected');sel.appendChild(o);});ST.sumPattern=sel.value;}
+function buildReport(){var cont=document.getElementById('tab-rep');cont.innerHTML='';cont.appendChild(mk('p',{cls:'cap-sec'},'สรุป Theory vs Actual ทุกแผนก'));var cutSec=mk('div',{cls:'rep-dept'});cutSec.appendChild(mk('div',{cls:'rep-title',style:'color:#378ADD'},'✂️ แผนกเครื่องตัด'));cutSec.appendChild(mk('div',{cls:'rep-grid',id:'rep-cut'}));var cw1=mk('div',{cls:'chart-box med'});cw1.appendChild(mk('canvas',{id:'ch-rep-cut'}));cutSec.appendChild(cw1);cont.appendChild(cutSec);var edgeSec=mk('div',{cls:'rep-dept'});edgeSec.appendChild(mk('div',{cls:'rep-title',style:'color:#1D9E75'},'⬜ แผนกเครื่องปิดขอบ'));edgeSec.appendChild(mk('div',{cls:'rep-grid',id:'rep-edge',style:'grid-template-columns:minmax(0,1fr)'}));var cw2=mk('div',{cls:'chart-box med'});cw2.appendChild(mk('canvas',{id:'ch-rep-edge'}));edgeSec.appendChild(cw2);cont.appendChild(edgeSec);var drillSec=mk('div',{cls:'rep-dept'});drillSec.appendChild(mk('div',{cls:'rep-title',style:'color:#BA7517'},'🔩 แผนกเครื่องเจาะ'));drillSec.appendChild(mk('div',{cls:'rep-grid',id:'rep-drill'}));var cw3=mk('div',{cls:'chart-box med'});cw3.appendChild(mk('canvas',{id:'ch-rep-drill'}));drillSec.appendChild(cw3);cont.appendChild(drillSec);cont.appendChild(mk('p',{cls:'cap-sec'},'ภาพรวมประสิทธิภาพ'));var cw4=mk('div',{cls:'chart-box',style:'height:260px'});cw4.appendChild(mk('canvas',{id:'ch-rep-overall'}));cont.appendChild(cw4);cont.appendChild(mk('div',{id:'rep-overall-tbl'}));}
+function reasonText(gap,lossMin,tgt,extra){var lossPct=tgt>0?Math.round(lossMin/tgt*100):0;var r='เวลาสูญเสีย '+lossMin+' นาที/วัน ('+lossPct+'%)';if(extra)r+=extra;if(gap>25)r+=' · ช่องว่างสูง ควรตรวจสอบ';else if(gap>15)r+=' · พิจารณาลด Loss Time';else r+=' · ประสิทธิภาพดี';return r;}
+function recalcAll(){
+  CUT.forEach(function(m){var td=[],ad=[];[0,1,2].forEach(function(si){var r=calcCut(m,si);td.push(r.tgtPcs);ad.push(r.actPcs);var el=document.getElementById(m.id+'-sc'+si+'-res');if(!el)return;el.innerHTML='';var ot=mk('div',{cls:'oc tgt'});ot.innerHTML='<div class="ol">📐 Theory</div><div class="ov" style="color:var(--ti)">'+f(r.tgtPcs)+'</div><div class="ou">ชิ้น/วัน</div>';var oa=mk('div',{cls:'oc act'});oa.innerHTML='<div class="ol">⏱ Actual</div><div class="ov" style="color:var(--tw)">'+f(r.actPcs)+'</div><div class="ou">'+pct(r.actPcs,r.tgtPcs)+'%</div>';el.appendChild(ot);el.appendChild(oa);});if(CUR==='cut')grouped('ch-cut-'+m.id,SC,[{label:'Theory',data:td,backgroundColor:'rgba(15,76,129,0.55)',borderRadius:4,borderWidth:0},{label:'Actual',data:ad,backgroundColor:m.col,borderRadius:4,borderWidth:0}]);});
+  var ct=document.getElementById('cut-tot');if(ct){ct.innerHTML='';[0,1,2].forEach(function(si){var a=CUT.reduce(function(s,m){return s+calcCut(m,si).actPcs;},0);var t=CUT.reduce(function(s,m){return s+calcCut(m,si).tgtPcs;},0);var d=mk('div');d.innerHTML='<div class="tl">'+SC_SHORT[si]+'</div><div class="tv">'+f(a)+'</div><div class="tu">Actual · Theory: '+f(t)+'</div>';ct.appendChild(d);});}
+  var eRes=EDGE.map(function(m){var ps=document.getElementById(m.id+'-pat');return calcEdge(m,ps?ps.value:m.pattern);});
+  EDGE.forEach(function(m,i){var outEl=document.getElementById(m.id+'-out');if(!outEl)return;outEl.innerHTML='';var r=eRes[i];if(r.inactive){var oc=mk('div',{style:'grid-column:span 4;text-align:center;background:var(--bda);border-radius:var(--r6);padding:12px'});oc.innerHTML='<div class="ov" style="color:var(--td)">🔴 ปิดใช้งาน</div>';outEl.appendChild(oc);}else{[{cls:'oc tgt',l:'📐 Theory',v:f(r.tgtM)+' เมตร',u:'≈ '+f(r.tgtPcs)+' ชิ้น',c:'var(--ti)'},{cls:'oc act',l:'⏱ Actual',v:f(r.actM)+' เมตร',u:pct(r.actM,r.tgtM)+'% · '+f(r.actPcs)+' ชิ้น',c:'var(--tw)'},{cls:'oc',l:'CT/ชิ้น',v:fd(r.ct,1),u:'วินาที',c:'var(--tp)'},{cls:'oc',l:'Rate Actual',v:fd(r.actPcs/(fv(m.id+'-hrs')||1),1),u:'ชิ้น/ชม.',c:'var(--tp)'}].forEach(function(item){var oc=mk('div',{cls:item.cls});oc.innerHTML='<div class="ol">'+item.l+'</div><div class="ov" style="color:'+item.c+'">'+item.v+'</div><div class="ou">'+item.u+'</div>';outEl.appendChild(oc);});}});
+  if(CUR==='edge'){killChart('ch-edge-sum');var ctx=document.getElementById('ch-edge-sum');if(ctx){var c=cc();charts['ch-edge-sum']=new Chart(ctx,{type:'bar',data:{labels:EDGE.map(function(m){return m.name.split(' ').slice(0,2).join(' ');}),datasets:[{label:'Theory (เมตร)',data:eRes.map(function(r){return r.tgtM;}),backgroundColor:'rgba(15,76,129,0.4)',borderRadius:4,borderWidth:0},{label:'Actual (เมตร)',data:eRes.map(function(r){return r.actM;}),backgroundColor:EDGE.map(function(m,i){return eRes[i].inactive?'#ccc':m.col;}),borderRadius:4,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:c.t,font:{size:11},boxWidth:11}},datalabels:{display:false}},scales:{x:{grid:{color:c.g},ticks:{color:c.t,font:{size:11,weight:'600'}}},y:{grid:{color:c.g},ticks:{color:c.t,font:{size:10}},beginAtZero:true}}}});}}
+  DRILL.forEach(function(m){var td=[],ad=[];[0,1,2].forEach(function(si){var r=calcDrill(m,si);td.push(r.tgtPcs);ad.push(r.actPcs);var el=document.getElementById(m.id+'-ds'+si+'-res');if(!el)return;el.innerHTML='';var ot=mk('div',{cls:'oc tgt'});ot.innerHTML='<div class="ol">📐 Theory</div><div class="ov" style="color:var(--ti)">'+f(r.tgtPcs)+'</div><div class="ou">ชิ้น · '+f(r.tgtHoles)+' รู/วัน</div>';var oa=mk('div',{cls:'oc act'});oa.innerHTML='<div class="ol">⏱ Actual</div><div class="ov" style="color:var(--tw)">'+f(r.actPcs)+'</div><div class="ou">ชิ้น · '+f(r.actHoles)+' รู/วัน</div>';el.appendChild(ot);el.appendChild(oa);});var fr=document.getElementById(m.id+'-formula');if(fr){var r0=calcDrill(m,0);fr.textContent='CT: ตำแหน่งเริ่ม '+fd(r0.initPos,2)+' วิ. + ('+r0.holes+' รู × '+fv(m.id+'-tpHole')+' วิ.) + '+(r0.holes-1)+' × '+fd(r0.travelPerMove,3)+' + โหลด '+fv(m.id+'-loadTime')+' วิ. = '+fd(r0.ctTheory,2)+' วิ./ชิ้น';}if(CUR==='drill')grouped('ch-drill-'+m.id,SC_DRILL,[{label:'Theory (ชิ้น)',data:td,backgroundColor:'rgba(15,76,129,0.55)',borderRadius:4,borderWidth:0},{label:'Actual (ชิ้น)',data:ad,backgroundColor:m.col,borderRadius:4,borderWidth:0}]);});
+  var dtg=document.getElementById('drill-tot-grid');if(dtg){dtg.innerHTML='';[0,1,2].forEach(function(si){var aa=DRILL.reduce(function(s,m){return s+calcDrill(m,si).actPcs;},0);var ah=DRILL.reduce(function(s,m){return s+calcDrill(m,si).actHoles;},0);var d=mk('div');d.innerHTML='<div class="tl">'+SC_SHORT[si]+'</div><div class="tv">'+f(aa)+'</div><div class="tu">ชิ้น · '+f(ah)+' รู/วัน</div>';dtg.appendChild(d);});}
+  if(CUR==='sum'){var csi=ST.sumCs,dsi=ST.sumDs,sp=ST.sumPattern;var cutT=CUT.reduce(function(s,m){return s+calcCut(m,csi).tgtPcs;},0),cutA=CUT.reduce(function(s,m){return s+calcCut(m,csi).actPcs;},0);var edgeFn=function(m){var st=document.getElementById(m.id+'-status');return calcEdge(m,sp,st?st.value:m.status);};var edgeT=EDGE.reduce(function(s,m){return s+edgeFn(m).tgtM;},0),edgeA=EDGE.reduce(function(s,m){return s+edgeFn(m).actM;},0),edgeAP=EDGE.reduce(function(s,m){return s+edgeFn(m).actPcs;},0);var drillT=DRILL.reduce(function(s,m){return s+calcDrill(m,dsi).tgtPcs;},0),drillA=DRILL.reduce(function(s,m){return s+calcDrill(m,dsi).actPcs;},0);var actPcs=[cutA,edgeAP,drillA],minPcs=Math.min.apply(null,actPcs),bnI=actPcs.indexOf(minPcs);var pnames=['แผนกตัด','แผนกปิดขอบ','แผนกเจาะ'],pcols=['#378ADD','#1D9E75','#BA7517'];var kpiEl=document.getElementById('sum-kpi');if(kpiEl){kpiEl.innerHTML='';[{l:'Output ทั้งไลน์',v:f(minPcs),u:'ชิ้น/วัน',c:pcols[bnI]},{l:'คอขวด',v:pnames[bnI],u:'กระบวนการจำกัด',c:'var(--td)'},{l:'LM ปิดขอบ/วัน',v:f(edgeA),u:'เมตร Actual',c:pcols[1]},{l:'ประสิทธิภาพเฉลี่ย',v:fd((pct(cutA,cutT)+pct(edgeA,edgeT)+pct(drillA,drillT))/3,1),u:'% (Act÷Theory)',c:'var(--ti)'}].forEach(function(k){var d=mk('div',{cls:'kpi'});d.innerHTML='<div class="kpi-l">'+k.l+'</div><div class="kpi-v" style="color:'+k.c+'">'+k.v+'</div><div class="kpi-u">'+k.u+'</div>';kpiEl.appendChild(d);});}var flowEl=document.getElementById('sum-flow');if(flowEl){flowEl.innerHTML='';[{n:'1. ตัด',v:cutA,u:'ชิ้น/วัน',ep:pct(cutA,cutT)},{n:'2. ปิดขอบ',v:edgeA,u:'เมตร/วัน',ep:pct(edgeA,edgeT)},{n:'3. เจาะ',v:drillA,u:'ชิ้น/วัน',ep:pct(drillA,drillT)}].forEach(function(fx,i){var isBN=i===bnI;var box=mk('div',{cls:'fbox'+(isBN?' bn':'')});var effBg=fx.ep>=90?'background:var(--bg);color:var(--tg)':fx.ep>=75?'background:var(--bw);color:var(--tw)':'background:var(--bda);color:var(--td)';box.innerHTML='<div class="fn">'+fx.n+'</div><div class="fv" style="color:'+(isBN?'var(--td)':pcols[i])+'">'+f(fx.v)+'</div><div class="fu">'+fx.u+(isBN?' · ⚠ คอขวด':'')+'</div><div class="feff" style="'+effBg+'">'+fx.ep+'%</div>';flowEl.appendChild(box);if(i<2)flowEl.appendChild(mk('div',{cls:'farr'},'→'));});}var noteEl=document.getElementById('sum-note');if(noteEl)noteEl.innerHTML='<b>วิเคราะห์:</b> คอขวดอยู่ที่ <b>'+pnames[bnI]+'</b> · Output จำกัดที่ <b>'+f(minPcs)+' ชิ้น/วัน</b>';grouped('ch-compare',['แผนกตัด (ชิ้น)','แผนกปิดขอบ (เมตร)','แผนกเจาะ (ชิ้น)'],[{label:'Theory',data:[cutT,edgeT,drillT],backgroundColor:'rgba(15,76,129,0.6)',borderRadius:4,borderWidth:0},{label:'Actual',data:[cutA,edgeA,drillA],backgroundColor:['#378ADD','#1D9E75','#BA7517'],borderRadius:4,borderWidth:0}]);var tblEl=document.getElementById('sum-table');if(tblEl){var rows=[{n:'Cutting',u:'ชิ้น/วัน',t:cutT,a:cutA,c:pcols[0]},{n:'Edge Banding',u:'เมตร/วัน',t:edgeT,a:edgeA,c:pcols[1]},{n:'Drilling',u:'ชิ้น/วัน',t:drillT,a:drillA,c:pcols[2]}];var h='<table class="ctbl"><thead><tr><th>กระบวนการ</th><th>หน่วย</th><th>สถานะ</th><th style="text-align:right">Theory</th><th style="text-align:right">Actual</th><th style="text-align:right">Eff%</th><th style="text-align:right">Loss%</th></tr></thead><tbody>';rows.forEach(function(r,i){var ep=pct(r.a,r.t),lp=100-ep,isBN=i===bnI;var badge=isBN?'<span class="badge badge-danger">⚠ คอขวด</span>':ep>=90?'<span class="badge badge-ok">✓ สมดุล</span>':'<span class="badge badge-warn">△ ส่วนเกิน</span>';h+='<tr style="'+(isBN?'background:var(--bda)':'')+'"><td class="n" style="color:'+(isBN?'var(--td)':r.c)+'">'+r.n+(isBN?' ⚠':'')+'</td><td>'+r.u+'</td><td>'+badge+'</td><td style="text-align:right">'+f(r.t)+'</td><td class="n" style="text-align:right;color:'+(isBN?'var(--td)':r.c)+'">'+f(r.a)+'</td><td style="text-align:right;font-weight:800;color:var(--ti)">'+ep+'%</td><td style="text-align:right;color:var(--td);font-weight:700">'+lp+'%</td></tr>';});tblEl.innerHTML=h+'</tbody></table>';}}
+  if(CUR==='rep'){var repCut=document.getElementById('rep-cut');if(repCut){repCut.innerHTML='';var ctd=[],cad=[];[0,1,2].forEach(function(si){var avgT=CUT.reduce(function(s,m){return s+calcCut(m,si).tgtPcs;},0)/CUT.length,avgA=CUT.reduce(function(s,m){return s+calcCut(m,si).actPcs;},0)/CUT.length,gap=100-pct(avgA,avgT);ctd.push(Math.round(avgT));cad.push(Math.round(avgA));var card=mk('div',{cls:'rep-card'});var rb=mk('div',{cls:'rep-bar'});rb.style.background='#378ADD';card.appendChild(rb);var lm=fv('c0-lossMin')||CUT[0].lossMin;card.innerHTML+='<div class="rep-sc">'+SC[si]+'</div><div class="rep-row"><span class="rep-lbl">📐 Theory เฉลี่ย</span><span class="rep-val" style="color:var(--ti)">'+f(Math.round(avgT))+'</span></div><div class="rep-row"><span class="rep-lbl">⏱ Actual เฉลี่ย</span><span class="rep-val" style="color:var(--tw)">'+f(Math.round(avgA))+'</span></div><div class="rep-gap"><span class="rep-gap-lbl">ช่องว่าง</span><span class="rep-gap-val" style="color:'+(gap>20?'var(--td)':gap>10?'var(--tw)':'var(--tg)')+'">'+gap+'%</span></div><div class="rep-pct-bar-wrap"><div class="rep-pct-bar" style="width:'+pct(Math.round(avgA),Math.round(avgT))+'%;background:#378ADD"></div></div><div class="rep-reason">'+reasonText(gap,lm,(fv('c0-hrs')||CUT[0].hrs)*60)+'</div>';repCut.appendChild(card);});if(document.getElementById('ch-rep-cut'))grouped('ch-rep-cut',SC,[{label:'Theory (ชิ้น)',data:ctd,backgroundColor:'rgba(55,138,221,0.4)',borderRadius:4,borderWidth:0},{label:'Actual (ชิ้น)',data:cad,backgroundColor:'#378ADD',borderRadius:4,borderWidth:0}],false);}var repEdge=document.getElementById('rep-edge');if(repEdge){repEdge.innerHTML='';var ed_t=0,ed_a=0,activeN=0;EDGE.forEach(function(m){var ps=document.getElementById(m.id+'-pat');var r=calcEdge(m,ps?ps.value:m.pattern);if(!r.inactive){ed_t+=r.tgtM;ed_a+=r.actM;activeN++;}});var ed_avgT=activeN>0?ed_t/activeN:0,ed_avgA=activeN>0?ed_a/activeN:0,ed_gap=100-pct(Math.round(ed_avgA),Math.round(ed_avgT));var card=mk('div',{cls:'rep-card'});var rb=mk('div',{cls:'rep-bar'});rb.style.background='#1D9E75';card.appendChild(rb);var lm2=fv('e0-lossMin')||EDGE[0].lossMin;card.innerHTML+='<div class="rep-sc">ทุกขนาดชิ้นงาน</div><div class="rep-row"><span class="rep-lbl">📐 Theory เฉลี่ย/เครื่อง</span><span class="rep-val" style="color:var(--ti)">'+f(Math.round(ed_avgT))+' เมตร</span></div><div class="rep-row"><span class="rep-lbl">⏱ Actual เฉลี่ย/เครื่อง</span><span class="rep-val" style="color:var(--tw)">'+f(Math.round(ed_avgA))+' เมตร</span></div><div class="rep-gap"><span class="rep-gap-lbl">ช่องว่าง</span><span class="rep-gap-val" style="color:'+(ed_gap>20?'var(--td)':ed_gap>10?'var(--tw)':'var(--tg)')+'">'+ed_gap+'%</span></div><div class="rep-pct-bar-wrap"><div class="rep-pct-bar" style="width:'+pct(Math.round(ed_avgA),Math.round(ed_avgT))+'%;background:#1D9E75"></div></div><div class="rep-reason">'+reasonText(ed_gap,lm2,(fv('e0-hrs')||EDGE[0].hrs)*60)+'</div>';repEdge.appendChild(card);grouped('ch-rep-edge',['ปิดขอบ รวม 4 เครื่อง'],[{label:'Theory (เมตร)',data:[Math.round(ed_t)],backgroundColor:'rgba(29,158,117,0.4)',borderRadius:4,borderWidth:0},{label:'Actual (เมตร)',data:[Math.round(ed_a)],backgroundColor:'#1D9E75',borderRadius:4,borderWidth:0}],false);}var repDrill=document.getElementById('rep-drill');if(repDrill){repDrill.innerHTML='';var dtd=[],dad=[];[0,1,2].forEach(function(si){var avgT=DRILL.reduce(function(s,m){return s+calcDrill(m,si).tgtPcs;},0)/DRILL.length,avgA=DRILL.reduce(function(s,m){return s+calcDrill(m,si).actPcs;},0)/DRILL.length,avgH=DRILL.reduce(function(s,m){return s+calcDrill(m,si).tgtHoles;},0)/DRILL.length,gap=100-pct(Math.round(avgA),Math.round(avgT));dtd.push(Math.round(avgT));dad.push(Math.round(avgA));var card=mk('div',{cls:'rep-card'});var rb=mk('div',{cls:'rep-bar'});rb.style.background='#BA7517';card.appendChild(rb);var lm3=fv('d0-lossMin')||DRILL[0].lossMin;card.innerHTML+='<div class="rep-sc">'+SC[si]+'</div><div class="rep-row"><span class="rep-lbl">📐 Theory</span><span class="rep-val" style="color:var(--ti)">'+f(Math.round(avgT))+'</span></div><div class="rep-row"><span class="rep-lbl">⏱ Actual</span><span class="rep-val" style="color:var(--tw)">'+f(Math.round(avgA))+'</span></div><div class="rep-row"><span class="rep-lbl">รู Theory</span><span style="font-size:12px;font-weight:700;color:var(--ti)">'+f(Math.round(avgH))+'</span></div><div class="rep-gap"><span class="rep-gap-lbl">ช่องว่าง</span><span class="rep-gap-val" style="color:'+(gap>20?'var(--td)':gap>10?'var(--tw)':'var(--tg)')+'">'+gap+'%</span></div><div class="rep-pct-bar-wrap"><div class="rep-pct-bar" style="width:'+pct(Math.round(avgA),Math.round(avgT))+'%;background:#BA7517"></div></div><div class="rep-reason">'+reasonText(gap,lm3,(fv('d0-hrs')||DRILL[0].hrs)*60)+'</div>';repDrill.appendChild(card);});grouped('ch-rep-drill',SC,[{label:'Theory (ชิ้น)',data:dtd,backgroundColor:'rgba(186,117,23,0.4)',borderRadius:4,borderWidth:0},{label:'Actual (ชิ้น)',data:dad,backgroundColor:'#BA7517',borderRadius:4,borderWidth:0}],false);}var avgCutEff=([0,1,2].reduce(function(s,si){return s+pct(CUT.reduce(function(ss,m){return ss+calcCut(m,si).actPcs;},0),CUT.reduce(function(ss,m){return ss+calcCut(m,si).tgtPcs;},0));},0))/3;var avgEdgeEff=pct(Math.round(EDGE.reduce(function(s,m){var ps=document.getElementById(m.id+'-pat');return s+calcEdge(m,ps?ps.value:m.pattern).actM;},0)),Math.round(EDGE.reduce(function(s,m){var ps=document.getElementById(m.id+'-pat');return s+calcEdge(m,ps?ps.value:m.pattern).tgtM;},0)));var avgDrillEff=([0,1,2].reduce(function(s,si){return s+pct(DRILL.reduce(function(ss,m){return ss+calcDrill(m,si).actPcs;},0),DRILL.reduce(function(ss,m){return ss+calcDrill(m,si).tgtPcs;},0));},0))/3;grouped('ch-rep-overall',['แผนกตัด','แผนกปิดขอบ','แผนกเจาะ'],[{label:'Theory 100%',data:[100,100,100],backgroundColor:'rgba(15,76,129,0.25)',borderRadius:4,borderWidth:0},{label:'Actual (%)',data:[Math.round(avgCutEff),Math.round(avgEdgeEff),Math.round(avgDrillEff)],backgroundColor:['#378ADD','#1D9E75','#BA7517'],borderRadius:4,borderWidth:0}],false);var tbl=document.getElementById('rep-overall-tbl');if(tbl){var rows=[{n:'✂️ แผนกตัด',eff:Math.round(avgCutEff),col:'#378ADD'},{n:'⬜ แผนกปิดขอบ',eff:Math.round(avgEdgeEff),col:'#1D9E75'},{n:'🔩 แผนกเจาะ',eff:Math.round(avgDrillEff),col:'#BA7517'}];var h='<table class="ctbl" style="margin-top:10px"><thead><tr><th>แผนก</th><th style="text-align:right">ประสิทธิภาพเฉลี่ย</th><th style="text-align:right">ช่องว่าง</th><th>สถานะ</th></tr></thead><tbody>';rows.forEach(function(r){var badge=r.eff>=90?'<span class="badge badge-ok">✓ ดี</span>':r.eff>=75?'<span class="badge badge-warn">△ ปานกลาง</span>':'<span class="badge badge-danger">⚠ ต้องปรับปรุง</span>';h+='<tr><td class="n" style="color:'+r.col+'">'+r.n+'</td><td style="text-align:right;font-weight:800;color:var(--ti)">'+r.eff+'%</td><td style="text-align:right;color:var(--td);font-weight:700">'+(100-r.eff)+'%</td><td>'+badge+'</td></tr>';});tbl.innerHTML=h+'</tbody></table>';}}
+}
+function sw(tid){CUR=tid;['sum','cut','edge','drill','rep'].forEach(function(t){var tab=document.getElementById('tab-'+t);if(tab)tab.style.display=(t===tid?'block':'none');var btn=document.getElementById('t-'+t);if(btn)btn.className='tb'+(t===tid?' a':'');});if(tid==='sum')buildSum();else if(tid==='cut')buildCut();else if(tid==='edge')buildEdge();else if(tid==='drill')buildDrill();else if(tid==='rep')buildReport();recalcAll();}
+
+/* ═══════════════════════════════════
+   MAINTENANCE SYSTEM
+═══════════════════════════════════ */
+var MACHINES=[
+  {id:'m1',name:'CHAMP FOND BS-120',type:'saw'},{id:'m2',name:'SCHELLING FH 4 330',type:'saw'},
+  {id:'m3',name:'HUAHUA HH-506R',type:'edge'},{id:'m_aw2m',name:'AW2M',type:'edge'},
+  {id:'m4',name:'CHAMP FOND EB-7B',type:'edge'},{id:'m5',name:'NANXING NB6IJ',type:'edge'},
+  {id:'m6',name:'WEEKE OPTIMAT NMC112',type:'drill'},{id:'m7',name:'SCM TECH Z2',type:'drill'},{id:'m8',name:'SCM TECH Z1',type:'drill'}
+];
+var CHECKLISTS={รายวัน:['ทำความสะอาดเครื่อง','เช็คน้ำมันไฮดรอลิก/ลม','ตรวจระบบความปลอดภัย'],รายสัปดาห์:['อัดจารบีลิเนียร์แบร์ริ่ง','เช็คความตึงสายพาน','ทำความสะอาดชิ้นส่วนขับเคลื่อน'],รายเดือน:['เปลี่ยนกรองอากาศ/น้ำมัน','ตรวจสอบระยะแกน XYZ','ตรวจระบบควบคุมหลัก'],รายปี:['เปลี่ยนอะไหล่ตามรอบ','เปลี่ยนชุดสายพาน','ตรวจวัดระบบไฟฟ้า']};
+var DEFAULT_TOOLS=[
+  {id:'t1',name:'ใบเลื่อย Freud TCT (Main)',type:'saw',machineId:'m1',carbideStart:3.0,carbideMin:1.5,sharpenLoss:0.3,maxSharpen:5,qualityDropPerSharpen:10,currentCarbide:3.0,sharpenCount:0,quality:100,totalWork:0,unit:'ชิ้น',lastMaterial:'ต่ำ'},
+  {id:'t2',name:'ใบเลื่อย Freud TCT (Scoring)',type:'saw',machineId:'m2',carbideStart:3.0,carbideMin:1.5,sharpenLoss:0.3,maxSharpen:5,qualityDropPerSharpen:10,currentCarbide:2.7,sharpenCount:1,quality:90,totalWork:450,unit:'ชิ้น',lastMaterial:'ปานกลาง'},
+  {id:'t3',name:'ดอกเจาะ Carbide 8mm',type:'drill',machineId:'m6',sharpenEvery:200,replaceEvery:1000,maxSharpen:4,qualityDropPerSharpen:10,sharpenCount:0,quality:100,totalWork:0,unit:'รู',lastMaterial:'ต่ำ'},
+  {id:'t4',name:'ดอกเจาะ Carbide 35mm บานพับ',type:'drill',machineId:'m7',sharpenEvery:200,replaceEvery:1000,maxSharpen:4,qualityDropPerSharpen:10,sharpenCount:3,quality:70,totalWork:650,unit:'รู',lastMaterial:'สูง'},
+  {id:'t5',name:'ใบตัดขอบ Carbide หยาบ',type:'trim',machineId:'m3',maxSharpen:4,qualityDropPerSharpen:10,sharpenCount:0,quality:100,totalWork:1200,unit:'เมตร',lastMaterial:'ต่ำ'},
+  {id:'t6',name:'ใบตัดขอบ Carbide ละเอียด',type:'trim',machineId:'m4',maxSharpen:4,qualityDropPerSharpen:10,sharpenCount:4,quality:40,totalWork:4200,unit:'เมตร',lastMaterial:'สูง'}
+];
+var mState={pmLogs:[],downtimeLogs:[],tools:[],toolLogs:[],multipliers:{'ต่ำ':1.0,'ปานกลาง':1.5,'สูง':2.0},activeToolTab:'saw'};
+function mSave(){localStorage.setItem('factory_maint_v2',JSON.stringify(mState));}
+function mInit(){try{var raw=localStorage.getItem('factory_maint_v2');if(raw){mState=JSON.parse(raw);return;}}catch(e){}mState.tools=[...DEFAULT_TOOLS];mState.downtimeLogs=[{machineId:'m1',start:'2026-05-25T08:00',end:'2026-05-25T10:00',reason:'เครื่องพัง',duration:120,workHours:8,capacity:500,detail:'สายพานขาด'},{machineId:'m3',start:'2026-05-26T13:00',end:'2026-05-26T14:00',reason:'เปลี่ยนหรือลับทูล',duration:60,workHours:8,capacity:600,detail:'ใบตัดหมดคม'},{machineId:'m7',start:'2026-05-27T09:00',end:'2026-05-27T09:45',reason:'PM ตามแผน',duration:45,workHours:8,capacity:400,detail:'PM รายสัปดาห์'}];mSave();}
+function getToolStatus(t){if(t.type==='saw'&&t.currentCarbide<t.carbideMin)return{text:'ต้องเปลี่ยนใหม่',badgeClass:'status-red'};if(t.sharpenCount>=t.maxSharpen)return{text:'ลับเต็มพิกัด',badgeClass:'status-red'};if(t.quality<70)return{text:'ต้องส่งลับคม',badgeClass:'status-yellow'};if(t.type==='drill'&&t.totalWork>=t.replaceEvery)return{text:'ต้องเปลี่ยนใหม่',badgeClass:'status-red'};return{text:'ใช้งานปกติ',badgeClass:'status-green'};}
+function mSwitchPage(pid){['dashboard','pm','tools','reports'].forEach(function(p){var el=document.getElementById('mpage-'+p);if(el){if(p===pid)el.classList.remove('hidden');else el.classList.add('hidden');}var btn=document.getElementById('mnav-'+p);if(btn){if(p===pid){btn.style.background='white';btn.style.color='#4338ca';}else{btn.style.background='transparent';btn.style.color='#6b7280';}}});if(pid==='dashboard')mRenderDash();if(pid==='pm')mPopulateForms();if(pid==='tools')mRenderTools();if(pid==='reports')mRenderReports();}
+function mRenderDash(){var totalDT=mState.downtimeLogs.reduce(function(a,l){return a+l.duration;},0);var totalAvail=8*60*MACHINES.length;var dtPct=(totalDT/totalAvail*100).toFixed(1);var oee=(100-dtPct).toFixed(1);var totalLost=0,alertTools=0;var met={};MACHINES.forEach(function(m){met[m.id]={dtMin:0,lostQty:0};});mState.downtimeLogs.forEach(function(l){if(met[l.machineId]){met[l.machineId].dtMin+=l.duration;var lost=Math.round((l.duration/(l.workHours*60))*l.capacity);met[l.machineId].lostQty+=lost;totalLost+=lost;}});mState.tools.forEach(function(t){if(getToolStatus(t).badgeClass!=='status-green')alertTools++;});document.getElementById('mkpi-oee').innerText=oee+'%';document.getElementById('mkpi-downtime').innerText=dtPct+'%';document.getElementById('mkpi-lost').innerText=totalLost+' ชิ้น';document.getElementById('mkpi-tools').innerText=alertTools+' รายการ';var reasons={'เครื่องพัง':0,'PM ตามแผน':0,'เปลี่ยนหรือลับทูล':0,'รอวัสดุ':0,'อื่นๆ':0};mState.downtimeLogs.forEach(function(l){if(reasons[l.reason]!==undefined)reasons[l.reason]+=l.duration;});var rTotal=Object.values(reasons).reduce(function(a,b){return a+b;},0)||1;var cHtml='';for(var r in reasons){var p=((reasons[r]/rTotal)*100).toFixed(0);cHtml+='<div class="text-xs"><div class="flex justify-between text-[11px] mb-1"><span>'+r+'</span><span class="font-bold">'+p+'%</span></div><div class="w-full bg-gray-200 h-2.5 rounded-full"><div class="bg-indigo-600 h-2.5 rounded-full" style="width:'+p+'%"></div></div></div>';}document.getElementById('mchart-dt').innerHTML=cHtml;var mHtml='';MACHINES.forEach(function(m){var mm=met[m.id];var dp=((mm.dtMin/(8*60))*100).toFixed(1);var sc=mm.dtMin>60?'status-red':mm.dtMin>0?'status-yellow':'status-green';var st=mm.dtMin>60?'หยุดซ่อม':mm.dtMin>0?'หยุดชั่วคราว':'กำลังรัน';mHtml+='<tr class="border-b border-gray-100"><td class="p-2 py-3 font-medium text-gray-800">'+m.name+'</td><td class="p-2 text-center"><span class="'+sc+' text-[10px] px-2 py-0.5 rounded-full">'+st+'</span></td><td class="p-2 text-right font-bold">'+dp+'%</td><td class="p-2 text-right text-red-500 font-medium">'+mm.lostQty+'</td></tr>';});document.getElementById('mtbl-machine').innerHTML=mHtml;var tHtml='';mState.tools.slice(0,5).forEach(function(t){var s=getToolStatus(t);var mach=MACHINES.find(function(m){return m.id===t.machineId;});tHtml+='<tr class="border-b border-gray-100 text-[11px]"><td class="p-2 font-medium">'+t.name+'<br><span class="text-gray-400 text-[10px]">'+(mach?mach.name:'-')+'</span></td><td class="p-2 text-center font-bold text-indigo-700">'+t.quality+'%</td><td class="p-2 text-center">'+t.sharpenCount+'</td><td class="p-2 text-center"><span class="'+s.badgeClass+' text-[10px] px-2 py-0.5 rounded-full">'+s.text+'</span></td></tr>';});document.getElementById('mtbl-tool').innerHTML=tHtml;}
+function mPopulateForms(){var opts=MACHINES.map(function(m){return'<option value="'+m.id+'">'+m.name+'</option>';}).join('');document.getElementById('mpm-machine').innerHTML=opts;document.getElementById('mdt-machine').innerHTML=opts;mUpdateChecklist();}
+function mUpdateChecklist(){var freq=document.getElementById('mpm-freq').value;var items=CHECKLISTS[freq]||[];document.getElementById('mpm-checklist').innerHTML=items.map(function(item,i){return'<label class="flex items-center gap-2 bg-white p-2 rounded border text-xs cursor-pointer"><input type="checkbox" required class="w-4 h-4 text-indigo-600 rounded"><span>'+(i+1)+'. '+item+'</span></label>';}).join('');}
+function mSavePM(e){e.preventDefault();mState.pmLogs.unshift({machineId:document.getElementById('mpm-machine').value,date:new Date().toLocaleDateString('th-TH'),frequency:document.getElementById('mpm-freq').value});mSave();alert('บันทึก PM สำเร็จ!');}
+function mSaveDT(e){e.preventDefault();var s=new Date(document.getElementById('mdt-start').value),en=new Date(document.getElementById('mdt-end').value);if(en<=s){alert('เวลากลับมาต้องอยู่หลังเวลาเริ่มหยุด!');return;}mState.downtimeLogs.unshift({machineId:document.getElementById('mdt-machine').value,start:document.getElementById('mdt-start').value,end:document.getElementById('mdt-end').value,reason:document.getElementById('mdt-reason').value,duration:Math.floor((en-s)/60000),workHours:parseFloat(document.getElementById('mdt-hrs').value),capacity:parseInt(document.getElementById('mdt-cap').value),detail:document.getElementById('mdt-detail').value});mSave();alert('บันทึก Downtime สำเร็จ!');}
+function mToolTab(type){mState.activeToolTab=type;['saw','drill','trim'].forEach(function(t){var btn=document.getElementById('mtab-'+t);if(btn){if(t===type){btn.style.background='white';btn.style.color='#1f2937';btn.style.boxShadow='0 1px 2px rgba(0,0,0,0.1)';}else{btn.style.background='#e5e7eb';btn.style.color='#4b5563';btn.style.boxShadow='none';}}});mRenderTools();}
+function mRenderTools(){var cont=document.getElementById('mtool-cards');var tools=mState.tools.filter(function(t){return t.type===mState.activeToolTab;});var html='';tools.forEach(function(t){var s=getToolStatus(t);var mach=MACHINES.find(function(m){return m.id===t.machineId;});html+='<div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100"><div class="flex justify-between items-start mb-2"><div><h4 class="font-bold text-sm text-gray-800">'+t.name+'</h4><p class="text-xs text-gray-400">'+(mach?mach.name:'')+'</p></div><span class="'+s.badgeClass+' text-[10px] font-medium px-2.5 py-0.5 rounded-full">'+s.text+'</span></div><div class="grid grid-cols-2 gap-2 my-3 text-[11px] bg-gray-50 p-2 rounded-lg">'+(t.type==='saw'?'<div><span class="text-gray-500">คาไบด์คงเหลือ:</span> <b class="text-indigo-600">'+t.currentCarbide.toFixed(2)+' มม.</b></div><div><span class="text-gray-500">เกณฑ์ต่ำสุด:</span> <b>'+t.carbideMin+' มม.</b></div>':'')+'<div><span class="text-gray-500">คุณภาพ:</span> <b class="text-indigo-600">'+t.quality+'%</b></div><div><span class="text-gray-500">ลับคมแล้ว:</span> <b>'+t.sharpenCount+'/'+t.maxSharpen+'</b></div><div class="col-span-2"><span class="text-gray-500">ใช้งานสะสม:</span> <b class="text-amber-600">'+t.totalWork.toLocaleString()+' '+t.unit+'</b></div></div></div>';});cont.innerHTML=html||'<p class="text-xs text-gray-400 text-center py-4">ไม่มีทูลในกลุ่มนี้</p>';}
+function mOpenToolModal(action){document.getElementById('mtool-action-type').value=action;var opts=mState.tools.map(function(t){return'<option value="'+t.id+'">'+t.name+'</option>';}).join('');document.getElementById('mtool-select').innerHTML=opts;if(action==='use'){document.getElementById('mtool-modal-title').innerText='🔨 บันทึกการใช้งานทูล';document.getElementById('mtool-use-fields').classList.remove('hidden');document.getElementById('mtool-sharpen-fields').classList.add('hidden');}else{document.getElementById('mtool-modal-title').innerText='✨ ลับคม / เปลี่ยนทูล';document.getElementById('mtool-use-fields').classList.add('hidden');document.getElementById('mtool-sharpen-fields').classList.remove('hidden');}document.getElementById('mtool-modal').classList.remove('hidden');mAdjustQtyLabel();}
+function mAdjustQtyLabel(){var tId=document.getElementById('mtool-select').value;var tool=mState.tools.find(function(t){return t.id===tId;});if(tool)document.getElementById('mtool-qty-label').innerText='จำนวนที่ใช้ ('+tool.unit+')';}
+function mSubmitTool(e){e.preventDefault();var action=document.getElementById('mtool-action-type').value,tId=document.getElementById('mtool-select').value;var tool=mState.tools.find(function(t){return t.id===tId;});if(!tool)return;if(action==='use'){var mat=document.getElementById('mtool-material').value,qty=parseFloat(document.getElementById('mtool-qty').value)||0,mult=mState.multipliers[mat]||1;var wear=qty*mult;tool.totalWork+=wear;tool.lastMaterial=mat;var drop=tool.type==='saw'?(wear/5000*5):tool.type==='drill'?(wear/200*20):(wear/2000*10);tool.quality=Math.max(0,Math.round(tool.quality-drop));mState.toolLogs.unshift({toolName:tool.name,action:'ใช้งานผลิต',detail:'วัสดุ'+mat+' '+qty+' '+tool.unit,date:new Date().toLocaleDateString('th-TH')});}else{var sub=document.getElementById('mtool-sharpen-type').value;if(sub==='sharpen'){if(tool.sharpenCount>=tool.maxSharpen){alert('ทูลหมดรอบลับคม! ควรเปลี่ยนใหม่');return;}tool.sharpenCount++;tool.quality=Math.max(0,100-(tool.sharpenCount*tool.qualityDropPerSharpen));if(tool.type==='saw')tool.currentCarbide=Math.max(tool.carbideMin,tool.currentCarbide-tool.sharpenLoss);mState.toolLogs.unshift({toolName:tool.name,action:'ส่งลับคม',detail:'ครั้งที่ '+tool.sharpenCount+' คุณภาพเหลือ '+tool.quality+'%',date:new Date().toLocaleDateString('th-TH')});}else{tool.sharpenCount=0;tool.quality=100;tool.totalWork=0;if(tool.type==='saw')tool.currentCarbide=tool.carbideStart;mState.toolLogs.unshift({toolName:tool.name,action:'เปลี่ยนทูลใหม่',detail:'Reset เป็นค่าเริ่มต้น',date:new Date().toLocaleDateString('th-TH')});}}mSave();document.getElementById('mtool-modal').classList.add('hidden');alert('บันทึกสำเร็จ!');if(!document.getElementById('mpage-tools').classList.contains('hidden'))mRenderTools();}
+function mRenderReports(){document.getElementById('mmult-low').value=mState.multipliers['ต่ำ'];document.getElementById('mmult-med').value=mState.multipliers['ปานกลาง'];document.getElementById('mmult-high').value=mState.multipliers['สูง'];var dtHtml=mState.downtimeLogs.map(function(l){var m=MACHINES.find(function(mm){return mm.id===l.machineId;});return'<tr class="border-b text-gray-700"><td class="p-2 font-medium">'+(m?m.name:'?')+'</td><td class="p-2">'+l.reason+'</td><td class="p-2 text-right font-bold text-red-600">'+l.duration+'</td><td class="p-2 text-gray-400 text-[10px]">'+l.start.split('T')[0]+'</td></tr>';}).join('');document.getElementById('mrep-dt').innerHTML=dtHtml||'<tr><td colspan="4" class="p-4 text-center text-gray-400">ไม่มีข้อมูล</td></tr>';var tlHtml=(mState.toolLogs||[]).map(function(l){return'<tr class="border-b text-gray-700"><td class="p-2 font-medium">'+l.toolName+'</td><td class="p-2 text-center"><span class="px-2 py-0.5 rounded text-[10px] '+(l.action==='ใช้งานผลิต'?'bg-blue-50 text-blue-600':'bg-amber-50 text-amber-600')+'">'+l.action+'</span></td><td class="p-2 text-gray-500">'+l.detail+'</td><td class="p-2 text-gray-400 text-[10px]">'+l.date+'</td></tr>';}).join('');document.getElementById('mrep-tool').innerHTML=tlHtml||'<tr><td colspan="4" class="p-4 text-center text-gray-400">ไม่มีข้อมูล</td></tr>';}
+function mSaveMult(){mState.multipliers['ต่ำ']=parseFloat(document.getElementById('mmult-low').value)||1;mState.multipliers['ปานกลาง']=parseFloat(document.getElementById('mmult-med').value)||1.5;mState.multipliers['สูง']=parseFloat(document.getElementById('mmult-high').value)||2;mSave();}
+
+/* ═══ BOOT ═══ */
+window.onload=function(){loadData();sw('sum');mInit();mRenderDash();};
+</script>
+</body>
+</html>
+HTMLEOF
+wc -c /mnt/user-data/outputs/factory-full.html
+Output
+
+Command argument is 119_729 bytes, exceeding the 100_000-byte per-argument limit. For large content, pipe via stdin or use a file-write API instead of embedding the content inline in the command. Argument preview: 'cat > /mnt/user-data/outputs/factory-full.html << \'HTMLEOF\'\n<!DOCTYPE html>\n<html lang="th">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1.0">\n<title'
